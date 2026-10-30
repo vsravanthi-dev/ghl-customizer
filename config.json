@@ -18,8 +18,11 @@
     }
   },
   "users": {
-    "user@example.com": {
-      "hideMenus": ["sb_settings"]
-    }
+    "zn75wx7Yp68SsLbZ7Ee0": { "hideMenus": ["sb_sites"] },
+    "eHSTNuzvw9Vek4jMknK1": { "hideMenus": ["sb_sites"] },
+    "BYNHWalUytfAzIF53Msw": { "hideMenus": ["sb_sites"] },
+    "C9b8vqSkoqyL0iq3Z2nm": { "hideMenus": ["sb_sites"] },
+    "R9k3EzZkDANa4emKSizB": { "hideMenus": ["sb_sites"] },
+    "vtEMaPhf7DS8CH30gakW": { "hideMenus": ["sb_sites"] }
   }
 }
