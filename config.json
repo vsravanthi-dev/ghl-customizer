@@ -1,0 +1,24 @@
+{
+  "default": {
+    "brandColor": "#1a73e8",
+    "menuNames": {
+      "sb_contacts": "Clients",
+      "sb_opportunities": "Deals"
+    },
+    "hideMenus": []
+  },
+  "subaccounts": {
+    "SUBACCOUNT_ID_1": {
+      "brandColor": "#e53935",
+      "menuNames": {
+        "sb_contacts": "Patients"
+      },
+      "hideMenus": ["sb_reputation"]
+    }
+  },
+  "users": {
+    "user@example.com": {
+      "hideMenus": ["sb_settings"]
+    }
+  }
+}
