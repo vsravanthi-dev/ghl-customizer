@@ -1,6 +1,7 @@
 {
   "default": {
-    "brandColor": "#0f172a",
+    "brandColor": "#1e293b",
+    "textColor": "#ffffff",
     "menuNames": {
       "sb_contacts": "Clients",
       "sb_opportunities": "Sales Pipeline"
