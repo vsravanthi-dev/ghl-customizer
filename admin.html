@@ -46,6 +46,7 @@ button{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:10
     <select id="scope">
       <option value="subaccounts">A sub-account</option>
       <option value="users">A specific user (in every sub-account)</option>
+      <option value="demo">All demo users (6 users, same settings)</option>
     </select>
 
     <div id="locBox">
@@ -53,10 +54,11 @@ button{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:10
       <select id="loc"><option value="">Choose a sub-account</option></select>
     </div>
     <div id="userBox" class="hidden">
-      <label for="uid">User ID <span class="hint">users already in the config appear in the list</span></label>
-      <input type="text" id="uid" list="ulist" placeholder="Paste or pick a user ID">
-      <datalist id="ulist"></datalist>
+      <label for="uidSel">User</label>
+      <select id="uidSel"></select>
+      <input type="text" id="uid" class="hidden" placeholder="Paste a user ID" style="margin-top:8px">
     </div>
+    <div id="demoNote" class="hidden hint" style="margin-top:12px">Saving applies these settings to all 6 demo users. The form shows Arjun Shetty's current settings.</div>
 
     <div id="form" class="hidden">
       <h2>Logo</h2>
@@ -102,6 +104,15 @@ var $ = function (id) { return document.getElementById(id); };
 var pw = sessionStorage.getItem("adminPw") || "";
 var CFG = {};
 var TEXT = ["logoUrl", "brandColor", "textColor", "activeTextColor", "settingsLabelColor", "settingsTitleColor"];
+var USERS = {
+  "zn75wx7Yp68SsLbZ7Ee0": "Arjun Shetty",
+  "eHSTNuzvw9Vek4jMknK1": "Kavya Nair",
+  "BYNHWalUytfAzIF53Msw": "Meera Rao",
+  "C9b8vqSkoqyL0iq3Z2nm": "Rohan Gowda",
+  "R9k3EzZkDANa4emKSizB": "Sneha Iyer",
+  "vtEMaPhf7DS8CH30gakW": "Vikas Hedge"
+};
+var DEMO_IDS = Object.keys(USERS);
 var LISTS = { hideMenus: ",", hideMenuTitles: ",", hideHeadings: "," };
 
 function api(action, body) {
@@ -122,7 +133,12 @@ function csv(s) { return s.split(",").map(function (x) { return x.trim(); }).fil
 
 function target() {
   var scope = $("scope").value;
-  return { scope: scope, id: scope === "users" ? $("uid").value.trim() : $("loc").value };
+  if (scope === "demo") return { scope: "users", id: DEMO_IDS[0] };
+  if (scope === "users") {
+    var v = $("uidSel").value;
+    return { scope: "users", id: v === "other" ? $("uid").value.trim() : v };
+  }
+  return { scope: "subaccounts", id: $("loc").value };
 }
 
 function fill() {
@@ -156,11 +172,17 @@ function start() {
     });
     return api("config");
   }).then(function (cfg) {
-    Object.keys(cfg.users || {}).forEach(function (u) {
+    var o0 = document.createElement("option");
+    o0.value = ""; o0.textContent = "Choose a user";
+    $("uidSel").appendChild(o0);
+    Object.keys(USERS).forEach(function (id) {
       var o = document.createElement("option");
-      o.value = u;
-      $("ulist").appendChild(o);
+      o.value = id; o.textContent = USERS[id];
+      $("uidSel").appendChild(o);
     });
+    var o1 = document.createElement("option");
+    o1.value = "other"; o1.textContent = "Other user (paste ID)";
+    $("uidSel").appendChild(o1);
   }).catch(function (e) {
     sessionStorage.removeItem("adminPw");
     $("msg1").textContent = e.message;
@@ -176,13 +198,19 @@ $("go").onclick = function () {
 if (pw) start();
 
 $("scope").onchange = function () {
-  var users = $("scope").value === "users";
-  $("locBox").classList.toggle("hidden", users);
-  $("userBox").classList.toggle("hidden", !users);
+  var sc = $("scope").value;
+  $("locBox").classList.toggle("hidden", sc !== "subaccounts");
+  $("userBox").classList.toggle("hidden", sc !== "users");
+  $("demoNote").classList.toggle("hidden", sc !== "demo");
   $("form").classList.add("hidden");
   say("");
+  if (sc === "demo") fill();
 };
 $("loc").onchange = fill;
+$("uidSel").onchange = function () {
+  $("uid").classList.toggle("hidden", $("uidSel").value !== "other");
+  fill();
+};
 $("uid").onchange = fill;
 
 $("save").onclick = function () {
@@ -201,8 +229,11 @@ $("save").onclick = function () {
   TEXT.forEach(function (k) { settings[k] = $(k).value.trim(); });
   Object.keys(LISTS).forEach(function (k) { settings[k] = csv($(k).value); });
   say("Saving...");
-  api("save", { scope: t.scope, id: t.id, settings: settings })
-    .then(function () { say("Saved. The sidebar updates in about a minute.", "ok"); })
+  var ids = $("scope").value === "demo" ? DEMO_IDS : [t.id];
+  ids.reduce(function (p, id) {
+    return p.then(function () { return api("save", { scope: t.scope, id: id, settings: settings }); });
+  }, Promise.resolve())
+    .then(function () { say("Saved" + (ids.length > 1 ? " for " + ids.length + " users" : "") + ". The sidebar updates in about a minute.", "ok"); })
     .catch(function (e) { say(e.message, "err"); });
 };
 </script>
