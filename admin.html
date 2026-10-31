@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sub-account settings</title>
+<style>
+:root{--bg:#eef1f5;--card:#fff;--ink:#17202e;--mute:#5d6b80;--line:#d6dce5;--accent:#0f766e}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1420;--card:#18202e;--ink:#eef2f7;--mute:#98a4b8;--line:#2c3648;--accent:#2dd4bf}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:660px;margin:40px auto;padding:0 16px}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:15px;margin:26px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+.sub{color:var(--mute);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:16px}
+label{display:block;font-weight:600;margin:16px 0 5px}
+.hint{color:var(--mute);font-weight:400;font-size:13px}
+input[type=text],input[type=password],select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:flex;gap:12px}.row>div{flex:1}
+.check{display:flex;gap:8px;align-items:center;font-weight:600;margin-top:16px}
+button{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:10px 20px;font:inherit;font-weight:600;cursor:pointer;margin-top:22px}
+@media (prefers-color-scheme:dark){button{color:#06231f}}
+#msg{margin-top:14px;font-weight:600;min-height:1.5em}
+.err{color:#c0392b}.ok{color:var(--accent)}
+.hidden{display:none}
+@media(max-width:560px){.row{flex-direction:column;gap:0}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Sidebar settings</h1>
+  <p class="sub">Choose who the settings are for, change them, and save.</p>
+
+  <div class="card" id="login">
+    <label for="pw" style="margin-top:0">Admin password</label>
+    <input type="password" id="pw" autocomplete="current-password">
+    <button id="go">Sign in</button>
+    <div id="msg1" class="err"></div>
+  </div>
+
+  <div class="card hidden" id="editor">
+    <label for="scope" style="margin-top:0">Settings for</label>
+    <select id="scope">
+      <option value="subaccounts">A sub-account</option>
+      <option value="users">A specific user (in every sub-account)</option>
+    </select>
+
+    <div id="locBox">
+      <label for="loc">Sub-account</label>
+      <select id="loc"><option value="">Choose a sub-account</option></select>
+    </div>
+    <div id="userBox" class="hidden">
+      <label for="uid">User ID <span class="hint">users already in the config appear in the list</span></label>
+      <input type="text" id="uid" list="ulist" placeholder="Paste or pick a user ID">
+      <datalist id="ulist"></datalist>
+    </div>
+
+    <div id="form" class="hidden">
+      <h2>Logo</h2>
+      <label for="logoUrl">Logo URL <span class="hint">shown at the top of the sidebar</span></label>
+      <input type="text" id="logoUrl" placeholder="https://...">
+
+      <h2>Colours</h2>
+      <div class="row">
+        <div><label for="brandColor">Sidebar</label><input type="text" id="brandColor" placeholder="#1e293b"></div>
+        <div><label for="textColor">Menu text</label><input type="text" id="textColor" placeholder="#ffffff"></div>
+        <div><label for="activeTextColor">Selected menu</label><input type="text" id="activeTextColor" placeholder="#1e293b"></div>
+      </div>
+      <div class="row">
+        <div><label for="settingsLabelColor">Settings headings</label><input type="text" id="settingsLabelColor" placeholder="#1e293b"></div>
+        <div><label for="settingsTitleColor">Settings titles</label><input type="text" id="settingsTitleColor" placeholder="#ffffff"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="whiteIcons"> White menu icons</label>
+
+      <h2>Menus</h2>
+      <label for="menuNames">Menu names <span class="hint">one per line, like sb_contacts=Clients</span></label>
+      <textarea id="menuNames"></textarea>
+
+      <label for="hideMenus">Hidden menus <span class="hint">menu ids separated by commas, like sb_marketing, sb_payments</span></label>
+      <textarea id="hideMenus"></textarea>
+
+      <label for="hideMenuTitles">Hidden menus by name <span class="hint">visible names separated by commas, like WA QR2</span></label>
+      <input type="text" id="hideMenuTitles">
+
+      <label for="hideHeadings">Hidden headings <span class="hint">separated by commas, like OTHER SETTINGS</span></label>
+      <input type="text" id="hideHeadings">
+
+      <label for="moveMenus">Menu order <span class="hint">one per line, like DashBoard before Conversations</span></label>
+      <textarea id="moveMenus"></textarea>
+
+      <button id="save">Save changes</button>
+    </div>
+    <div id="msg" role="status"></div>
+  </div>
+</main>
+
+<script>
+var $ = function (id) { return document.getElementById(id); };
+var pw = sessionStorage.getItem("adminPw") || "";
+var CFG = {};
+var TEXT = ["logoUrl", "brandColor", "textColor", "activeTextColor", "settingsLabelColor", "settingsTitleColor"];
+var LISTS = { hideMenus: ",", hideMenuTitles: ",", hideHeadings: "," };
+
+function api(action, body) {
+  return fetch("/api/admin?action=" + action, {
+    method: body ? "POST" : "GET",
+    headers: { "x-admin-password": pw, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined
+  }).then(function (r) {
+    return r.json().then(function (j) {
+      if (!r.ok) throw new Error(j.error || "Request failed");
+      return j;
+    });
+  });
+}
+
+function say(text, cls) { $("msg").textContent = text; $("msg").className = cls || ""; }
+function csv(s) { return s.split(",").map(function (x) { return x.trim(); }).filter(Boolean); }
+
+function target() {
+  var scope = $("scope").value;
+  return { scope: scope, id: scope === "users" ? $("uid").value.trim() : $("loc").value };
+}
+
+function fill() {
+  var t = target();
+  say("");
+  if (!t.id) { $("form").classList.add("hidden"); return; }
+  api("config").then(function (cfg) {
+    CFG = cfg;
+    var s = (cfg[t.scope] || {})[t.id] || {};
+    TEXT.forEach(function (k) { $(k).value = s[k] || ""; });
+    $("whiteIcons").checked = !!s.whiteIcons;
+    $("menuNames").value = Object.keys(s.menuNames || {}).map(function (k) { return k + "=" + s.menuNames[k]; }).join("\n");
+    Object.keys(LISTS).forEach(function (k) {
+      var v = (s[k] || []).join(", ");
+      $(k).value = v;
+    });
+    $("moveMenus").value = (s.moveMenus || []).map(function (m) { return m.title + " before " + m.before; }).join("\n");
+    $("form").classList.remove("hidden");
+  }).catch(function (e) { say(e.message, "err"); });
+}
+
+function start() {
+  api("locations").then(function (list) {
+    $("login").classList.add("hidden");
+    $("editor").classList.remove("hidden");
+    list.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    list.forEach(function (l) {
+      var o = document.createElement("option");
+      o.value = l.id; o.textContent = l.name;
+      $("loc").appendChild(o);
+    });
+    return api("config");
+  }).then(function (cfg) {
+    Object.keys(cfg.users || {}).forEach(function (u) {
+      var o = document.createElement("option");
+      o.value = u;
+      $("ulist").appendChild(o);
+    });
+  }).catch(function (e) {
+    sessionStorage.removeItem("adminPw");
+    $("msg1").textContent = e.message;
+  });
+}
+
+$("go").onclick = function () {
+  pw = $("pw").value;
+  sessionStorage.setItem("adminPw", pw);
+  $("msg1").textContent = "";
+  start();
+};
+if (pw) start();
+
+$("scope").onchange = function () {
+  var users = $("scope").value === "users";
+  $("locBox").classList.toggle("hidden", users);
+  $("userBox").classList.toggle("hidden", !users);
+  $("form").classList.add("hidden");
+  say("");
+};
+$("loc").onchange = fill;
+$("uid").onchange = fill;
+
+$("save").onclick = function () {
+  var t = target();
+  var names = {};
+  $("menuNames").value.split("\n").forEach(function (line) {
+    var i = line.indexOf("=");
+    if (i > 0 && line.slice(i + 1).trim()) names[line.slice(0, i).trim()] = line.slice(i + 1).trim();
+  });
+  var moves = [];
+  $("moveMenus").value.split("\n").forEach(function (line) {
+    var p = line.split(/\s+before\s+/i);
+    if (p.length === 2 && p[0].trim() && p[1].trim()) moves.push({ title: p[0].trim(), before: p[1].trim() });
+  });
+  var settings = { whiteIcons: $("whiteIcons").checked, menuNames: names, moveMenus: moves };
+  TEXT.forEach(function (k) { settings[k] = $(k).value.trim(); });
+  Object.keys(LISTS).forEach(function (k) { settings[k] = csv($(k).value); });
+  say("Saving...");
+  api("save", { scope: t.scope, id: t.id, settings: settings })
+    .then(function () { say("Saved. The sidebar updates in about a minute.", "ok"); })
+    .catch(function (e) { say(e.message, "err"); });
+};
+</script>
+</body>
+</html>
