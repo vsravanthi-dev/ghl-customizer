@@ -2,6 +2,7 @@
   "default": {
     "brandColor": "#1e293b",
     "textColor": "#ffffff",
+    "activeTextColor": "#1e293b",
     "menuNames": {
       "sb_contacts": "Clients",
       "sb_opportunities": "Sales Pipeline"
@@ -18,11 +19,11 @@
     }
   },
   "users": {
-    "zn75wx7Yp68SsLbZ7Ee0": { "brandColor": "#0f766e", "hideMenus": ["sb_sites"] },
-    "eHSTNuzvw9Vek4jMknK1": { "brandColor": "#0f766e", "hideMenus": ["sb_sites"] },
-    "BYNHWalUytfAzIF53Msw": { "brandColor": "#0f766e", "hideMenus": ["sb_sites"] },
-    "C9b8vqSkoqyL0iq3Z2nm": { "brandColor": "#0f766e", "hideMenus": ["sb_sites"] },
-    "R9k3EzZkDANa4emKSizB": { "brandColor": "#0f766e", "hideMenus": ["sb_sites"] },
-    "vtEMaPhf7DS8CH30gakW": { "brandColor": "#0f766e", "hideMenus": ["sb_sites"] }
+    "zn75wx7Yp68SsLbZ7Ee0": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "hideMenus": ["sb_sites"] },
+    "eHSTNuzvw9Vek4jMknK1": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "hideMenus": ["sb_sites"] },
+    "BYNHWalUytfAzIF53Msw": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "hideMenus": ["sb_sites"] },
+    "C9b8vqSkoqyL0iq3Z2nm": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "hideMenus": ["sb_sites"] },
+    "R9k3EzZkDANa4emKSizB": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "hideMenus": ["sb_sites"] },
+    "vtEMaPhf7DS8CH30gakW": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "hideMenus": ["sb_sites"] }
   }
 }
