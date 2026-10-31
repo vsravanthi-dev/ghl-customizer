@@ -36,6 +36,8 @@ module.exports = async (req, res) => {
     if (action === "locations") {
       return res.json([
         { id: "BUgWVdqLMd3RZYncJ0VV", name: "Sidvin Celeste" },
+        { id: "NxLoq60TfQJ0yNAm3tK3", name: "Realtee" },
+        { id: "byaCGrVxZtJJwdTAddVM", name: "Sidvin developers" },
       ]);
     }
 
