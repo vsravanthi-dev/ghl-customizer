@@ -34,13 +34,9 @@ module.exports = async (req, res) => {
     const action = req.query.action;
 
     if (action === "locations") {
-      const r = await fetch(
-        `https://services.leadconnectorhq.com/locations/search?companyId=${process.env.GHL_COMPANY_ID}&limit=100`,
-        { headers: { Authorization: `Bearer ${process.env.GHL_TOKEN}`, Version: "2021-07-28", Accept: "application/json" } }
-      );
-      const j = await r.json();
-      if (!r.ok) return res.status(502).json({ error: "GHL error: " + (j.message || r.status) });
-      return res.json((j.locations || []).map((l) => ({ id: l.id, name: l.name })));
+      return res.json([
+        { id: "BUgWVdqLMd3RZYncJ0VV", name: "Sidvin Celeste" },
+      ]);
     }
 
     if (action === "config") {
