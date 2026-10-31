@@ -4,6 +4,7 @@
     "textColor": "#ffffff",
     "activeTextColor": "#1e293b",
     "settingsLabelColor": "#1e293b",
+    "settingsTitleColor": "#ffffff",
     "whiteIcons": true,
     "menuNames": {
       "sb_contacts": "Clients",
