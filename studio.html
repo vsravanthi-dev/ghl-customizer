@@ -26,13 +26,16 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .tab{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 16px;font:inherit;font-weight:600;cursor:pointer}
 .tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 @media (prefers-color-scheme:dark){.tab.on{color:#06231f}}
-.mrow{display:grid;grid-template-columns:34px 1fr 1fr 96px;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
+.mrow{display:grid;grid-template-columns:34px 1fr 1fr 96px auto;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
 .mrow.off .mtitle{opacity:.45;text-decoration:line-through}
 .mtitle{font-weight:600}
 .eye{background:transparent;border:1px solid var(--line);border-radius:8px;width:34px;height:34px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .mrow.off .eye{color:var(--mute);background:var(--bg)}
 .badge{font-size:12px;color:var(--mute);background:var(--bg);border-radius:6px;padding:0 6px;text-align:center}
 .badge:empty{visibility:hidden}
+.bulk{display:flex;gap:6px}
+.mini{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:4px 8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.mini:hover{border-color:var(--accent)}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
 .cfield .row2{display:flex;gap:8px}
 .cfield input[type=color]{width:44px;height:36px;padding:2px;border:1px solid var(--line);border-radius:7px;background:var(--bg);cursor:pointer}
@@ -52,7 +55,7 @@ summary{cursor:pointer;font-weight:600}
 #pvLogo{margin:0 6px 12px;min-height:34px}
 #pvLogo img{max-height:42px;max-width:100%;background:#fff;border-radius:6px;padding:3px 5px}
 .pvitem{padding:8px 10px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:2px}
-@media(max-width:760px){.studio{grid-template-columns:1fr}.pvwrap{position:static}.bar{grid-template-columns:1fr}.mrow{grid-template-columns:34px 1fr 1fr}.badge{display:none}.cgrid{grid-template-columns:1fr}}
+@media(max-width:760px){.studio{grid-template-columns:1fr}.pvwrap{position:static}.bar{grid-template-columns:1fr}.mrow{grid-template-columns:34px 1fr 1fr}.badge{display:none}.bulk{grid-column:1/-1}.cgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -279,7 +282,16 @@ function renderRows() {
     var b = document.createElement("span");
     b.className = "badge";
     b.textContent = m.hidden ? (m.baseHidden ? "Hidden (all)" : "Hidden") : (m.baseHidden ? "Shown here" : "");
-    row.appendChild(eye); row.appendChild(t); row.appendChild(inp); row.appendChild(b);
+    var bk = document.createElement("span");
+    bk.className = "bulk";
+    [["show", "Show all"], ["hide", "Hide all"]].forEach(function (x) {
+      var bt = document.createElement("button");
+      bt.type = "button"; bt.className = "mini"; bt.textContent = x[1];
+      bt.title = x[1] + ": " + m.title + " for every sub-account and user";
+      bt.onclick = function () { bulkMenu(m, x[0]); };
+      bk.appendChild(bt);
+    });
+    row.appendChild(eye); row.appendChild(t); row.appendChild(inp); row.appendChild(b); row.appendChild(bk);
     box.appendChild(row);
   });
 }
@@ -372,6 +384,18 @@ function collect() {
   });
   s.moveMenus = moves;
   return s;
+}
+
+function bulkMenu(m, mode) {
+  var word = mode === "hide" ? "Hide" : "Show";
+  if (!confirm(word + " \"" + m.title + "\" for EVERYONE (all sub-accounts and all users)?\n\nThis replaces any setting for this menu in every sub-account and user. Unsaved changes on this screen will be lost.")) return;
+  say("Saving...");
+  api("bulk", { id: m.id, title: m.title, byTitle: !!m.byTitle, mode: mode })
+    .then(function () {
+      say(word + " \"" + m.title + "\" saved for everyone. The sidebar updates in about a minute.", "ok");
+      fill();
+    })
+    .catch(function (e) { say(e.message, "err"); });
 }
 
 function target() {
