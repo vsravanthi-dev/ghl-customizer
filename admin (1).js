@@ -34,6 +34,12 @@ const FALLBACK = [
   { id: "Zi3agfEBlJBtgFbvGEOp", name: "Elpro360.ai" },
 ];
 
+const ghlHeaders = () => ({
+  Authorization: "Bearer " + process.env.GHL_TOKEN,
+  Version: "2021-07-28",
+  Accept: "application/json",
+});
+
 async function getLocations() {
   const token = process.env.GHL_TOKEN;
   const company = process.env.GHL_COMPANY_ID;
@@ -44,13 +50,7 @@ async function getLocations() {
       const r = await fetch(
         "https://services.leadconnectorhq.com/locations/search?companyId=" +
           encodeURIComponent(company) + "&limit=100&skip=" + skip,
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-            Version: "2021-07-28",
-            Accept: "application/json",
-          },
-        }
+        { headers: ghlHeaders() }
       );
       if (!r.ok) return out.length ? out : FALLBACK;
       const j = await r.json();
@@ -64,12 +64,64 @@ async function getLocations() {
   return out.length ? out : FALLBACK;
 }
 
+const userName = (u) =>
+  (u.name || ((u.firstName || "") + " " + (u.lastName || "")).trim() || u.email || "").trim();
+
+// Real users from GHL: agency-level search first, then each sub-account as a backup
+async function getUsers() {
+  const token = process.env.GHL_TOKEN;
+  const company = process.env.GHL_COMPANY_ID;
+  if (!token) return { users: [], note: "GHL_TOKEN not set" };
+  const map = {};
+  const add = (list) =>
+    (list || []).forEach((u) => {
+      if (u.id) map[u.id] = userName(u) || "User " + u.id;
+    });
+  let note = "";
+  try {
+    if (company) {
+      for (let skip = 0; skip < 2000; skip += 100) {
+        const r = await fetch(
+          "https://services.leadconnectorhq.com/users/search?companyId=" +
+            encodeURIComponent(company) + "&limit=100&skip=" + skip,
+          { headers: ghlHeaders() }
+        );
+        if (!r.ok) { note = "users/search " + r.status; break; }
+        const j = await r.json();
+        const list = j.users || [];
+        add(list);
+        if (list.length < 100) break;
+      }
+    }
+  } catch (e) { note = e.message; }
+  if (!Object.keys(map).length) {
+    try {
+      const locs = await getLocations();
+      for (const l of locs) {
+        const r = await fetch(
+          "https://services.leadconnectorhq.com/users/?locationId=" + encodeURIComponent(l.id),
+          { headers: ghlHeaders() }
+        );
+        if (r.ok) add((await r.json()).users);
+      }
+    } catch (e) { note = note || e.message; }
+  }
+  const users = Object.keys(map)
+    .map((id) => ({ id, name: map[id] }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return { users, note: users.length ? "" : note || "No users returned" };
+}
+
 module.exports = async (req, res) => {
   try {
     const action = req.query.action;
 
     if (action === "locations") {
       return res.json(await getLocations());
+    }
+
+    if (action === "users") {
+      return res.json(await getUsers());
     }
 
     if (action === "config") {
@@ -111,7 +163,6 @@ module.exports = async (req, res) => {
     }
 
     if (action === "bulk" && req.method === "POST") {
-      // Show or hide ONE menu for everyone (default + every sub-account + every user)
       const { id, title, byTitle, mode } = req.body || {};
       if (!id || !title || !["show", "hide"].includes(mode)) {
         return res.status(400).json({ error: "Missing data" });
@@ -121,7 +172,6 @@ module.exports = async (req, res) => {
       const without = (arr) => (arr || []).filter((x) => x !== key);
       const { cfg, sha } = await readConfig();
 
-      // 1) the "Everyone" level
       cfg.default = cfg.default || {};
       cfg.default[hideField] = without(cfg.default[hideField]);
       if (mode === "hide") cfg.default[hideField].push(key);
@@ -130,7 +180,6 @@ module.exports = async (req, res) => {
         if (!cfg.default[f] || !cfg.default[f].length) delete cfg.default[f];
       });
 
-      // 2) clear this menu from every sub-account and user, so they follow "Everyone"
       ["subaccounts", "users"].forEach((scope) => {
         Object.keys(cfg[scope] || {}).forEach((k) => {
           const o = cfg[scope][k];
