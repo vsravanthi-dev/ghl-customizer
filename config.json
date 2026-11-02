@@ -54,7 +54,8 @@
       "hideMenus": [
         "sb_payments",
         "sb_app-media",
-        "sb_reporting"
+        "sb_reporting",
+        "sb_app-marketplace"
       ]
     }
   },
