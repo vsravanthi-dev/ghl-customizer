@@ -26,13 +26,13 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .tab{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 16px;font:inherit;font-weight:600;cursor:pointer}
 .tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 @media (prefers-color-scheme:dark){.tab.on{color:#06231f}}
-.mrow{display:grid;grid-template-columns:34px 1fr 1fr 60px;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
+.mrow{display:grid;grid-template-columns:34px 1fr 1fr 96px;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
 .mrow.off .mtitle{opacity:.45;text-decoration:line-through}
 .mtitle{font-weight:600}
 .eye{background:transparent;border:1px solid var(--line);border-radius:8px;width:34px;height:34px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .mrow.off .eye{color:var(--mute);background:var(--bg)}
 .badge{font-size:12px;color:var(--mute);background:var(--bg);border-radius:6px;padding:0 6px;text-align:center}
-.mrow:not(.off) .badge{visibility:hidden}
+.badge:empty{visibility:hidden}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
 .cfield .row2{display:flex;gap:8px}
 .cfield input[type=color]{width:44px;height:36px;padding:2px;border:1px solid var(--line);border-radius:7px;background:var(--bg);cursor:pointer}
@@ -76,6 +76,7 @@ summary{cursor:pointer;font-weight:600}
             <option value="subaccounts">A sub-account</option>
             <option value="users">A specific user (in every sub-account)</option>
             <option value="demo">All demo users (6 users, same settings)</option>
+            <option value="everyone">Everyone (all sub-accounts and users)</option>
           </select>
         </div>
         <div>
@@ -88,6 +89,7 @@ summary{cursor:pointer;font-weight:600}
             <select id="uidSel"></select>
             <input type="text" id="uid" class="hidden" placeholder="Paste a user ID" style="margin-top:8px">
           </div>
+          <div id="everyoneNote" class="hidden hint" style="margin-top:6px">These settings apply to every sub-account and user. A sub-account can still override them.</div>
           <div id="demoNote" class="hidden hint" style="margin-top:6px">Saving applies these settings to all 6 demo users. The form shows Arjun Shetty's current settings.</div>
         </div>
       </div>
@@ -146,6 +148,7 @@ var $ = function (id) { return document.getElementById(id); };
 var pw = sessionStorage.getItem("adminPw") || "";
 var CFG = null;
 var EXTRA_NAMES = {};
+var EXTRA_SHOW = [];
 var USERS = {
   "zn75wx7Yp68SsLbZ7Ee0": "Arjun Shetty",
   "eHSTNuzvw9Vek4jMknK1": "Kavya Nair",
@@ -275,7 +278,8 @@ function renderRows() {
     inp.type = "text"; inp.placeholder = "Rename"; inp.value = m.name || "";
     inp.oninput = function () { m.name = inp.value; renderPreview(); };
     var b = document.createElement("span");
-    b.className = "badge"; b.textContent = "Hidden";
+    b.className = "badge";
+    b.textContent = m.hidden ? (m.baseHidden ? "Hidden (all)" : "Hidden") : (m.baseHidden ? "Shown here" : "");
     row.appendChild(eye); row.appendChild(t); row.appendChild(inp); row.appendChild(b);
     box.appendChild(row);
   });
@@ -308,16 +312,26 @@ function renderPreview() {
   });
 }
 
-function loadSettings(s) {
+function loadSettings(s, isDefault) {
   var ids = s.hideMenus || [];
   var titles = s.hideMenuTitles || [];
   var names = s.menuNames || {};
+  var show = s.showMenus || [];
+  var base = isDefault ? {} : ((CFG && CFG.default) || {});
+  var baseIds = base.hideMenus || [];
+  var baseTitles = base.hideMenuTitles || [];
   var known = {};
+  var keys = {};
   MENUS.forEach(function (m) {
     known[m.id] = true;
-    m.hidden = m.byTitle ? titles.indexOf(m.title) > -1 : ids.indexOf(m.id) > -1;
+    var key = m.byTitle ? m.title : m.id;
+    keys[key] = true;
+    var own = m.byTitle ? titles.indexOf(m.title) > -1 : ids.indexOf(m.id) > -1;
+    m.baseHidden = m.byTitle ? baseTitles.indexOf(m.title) > -1 : baseIds.indexOf(m.id) > -1;
+    m.hidden = (own || m.baseHidden) && show.indexOf(key) === -1;
     m.name = names[m.id] || "";
   });
+  EXTRA_SHOW = show.filter(function (k) { return !keys[k]; });
   var byTitleNames = MENUS.filter(function (m) { return m.byTitle; }).map(function (m) { return m.title; });
   $("extraIds").value = ids.filter(function (id) { return !known[id]; }).join(", ");
   $("extraTitles").value = titles.filter(function (t) { return byTitleNames.indexOf(t) === -1; }).join(", ");
@@ -337,8 +351,14 @@ function collect() {
   COLORS.forEach(function (c) { s[c[0]] = $(c[0]).value.trim(); });
   s.logoUrl = $("logoUrl").value.trim();
   s.whiteIcons = $("whiteIcons").checked;
-  s.hideMenus = uniq(MENUS.filter(function (m) { return !m.byTitle && m.hidden; }).map(function (m) { return m.id; }).concat(csv($("extraIds").value)));
-  s.hideMenuTitles = uniq(MENUS.filter(function (m) { return m.byTitle && m.hidden; }).map(function (m) { return m.title; }).concat(csv($("extraTitles").value)));
+  var hideIds = [], hideTitles = [], showKeys = [];
+  MENUS.forEach(function (m) {
+    if (m.hidden && !m.baseHidden) { if (m.byTitle) hideTitles.push(m.title); else hideIds.push(m.id); }
+    else if (!m.hidden && m.baseHidden) showKeys.push(m.byTitle ? m.title : m.id);
+  });
+  s.hideMenus = uniq(hideIds.concat(csv($("extraIds").value)));
+  s.hideMenuTitles = uniq(hideTitles.concat(csv($("extraTitles").value)));
+  s.showMenus = uniq(showKeys.concat(EXTRA_SHOW));
   var names = Object.assign({}, EXTRA_NAMES);
   MENUS.forEach(function (m) {
     var n = (m.name || "").trim();
@@ -357,6 +377,7 @@ function collect() {
 
 function target() {
   var scope = $("scope").value;
+  if (scope === "everyone") return { scope: "default", id: "all" };
   if (scope === "demo") return { scope: "users", id: DEMO_IDS[0] };
   if (scope === "users") {
     var v = $("uidSel").value;
@@ -371,7 +392,8 @@ function fill() {
   if (!t.id) { $("studio").classList.add("hidden"); return; }
   api("config").then(function (cfg) {
     CFG = cfg;
-    loadSettings((cfg[t.scope] || {})[t.id] || {});
+    var cur = t.scope === "default" ? (cfg.default || {}) : ((cfg[t.scope] || {})[t.id] || {});
+    loadSettings(cur, t.scope === "default");
     $("studio").classList.remove("hidden");
   }).catch(function (e) { say(e.message, "err"); });
 }
@@ -415,9 +437,10 @@ $("scope").onchange = function () {
   $("locBox").classList.toggle("hidden", sc !== "subaccounts");
   $("userBox").classList.toggle("hidden", sc !== "users");
   $("demoNote").classList.toggle("hidden", sc !== "demo");
+  $("everyoneNote").classList.toggle("hidden", sc !== "everyone");
   $("studio").classList.add("hidden");
   say("");
-  if (sc === "demo") fill();
+  if (sc === "demo" || sc === "everyone") fill();
 };
 $("loc").onchange = fill;
 $("uidSel").onchange = function () {
