@@ -75,7 +75,6 @@ summary{cursor:pointer;font-weight:600}
           <select id="scope">
             <option value="subaccounts">A sub-account</option>
             <option value="users">A specific user (in every sub-account)</option>
-            <option value="demo">All demo users (6 users, same settings)</option>
             <option value="everyone">Everyone (all sub-accounts and users)</option>
           </select>
         </div>
@@ -90,7 +89,6 @@ summary{cursor:pointer;font-weight:600}
             <input type="text" id="uid" class="hidden" placeholder="Paste a user ID" style="margin-top:8px">
           </div>
           <div id="everyoneNote" class="hidden hint" style="margin-top:6px">These settings apply to every sub-account and user. A sub-account can still override them.</div>
-          <div id="demoNote" class="hidden hint" style="margin-top:6px">Saving applies these settings to all 6 demo users. The form shows Arjun Shetty's current settings.</div>
         </div>
       </div>
     </div>
@@ -149,15 +147,16 @@ var pw = sessionStorage.getItem("adminPw") || "";
 var CFG = null;
 var EXTRA_NAMES = {};
 var EXTRA_SHOW = [];
+// Known user names. Any other user id found in config.json shows up automatically,
+// and any user can be added with "Other user (paste ID)".
 var USERS = {
   "zn75wx7Yp68SsLbZ7Ee0": "Arjun Shetty",
   "eHSTNuzvw9Vek4jMknK1": "Kavya Nair",
-  "BYNHWalUytfAzIF53Msw": "Meera Rao",
+  "BYNHWalUytfAzlF53Msw": "Meera Rao",
   "C9b8vqSkoqyL0iq3Z2nm": "Rohan Gowda",
   "R9k3EzZkDANa4emKSizB": "Sneha Iyer",
   "vtEMaPhf7DS8CH30gakW": "Vikas Hedge"
 };
-var DEMO_IDS = Object.keys(USERS);
 var MENUS = [
   { id: "sb_dashboard", title: "Dashboard" },
   { id: "sb_conversations", title: "Conversations" },
@@ -378,7 +377,6 @@ function collect() {
 function target() {
   var scope = $("scope").value;
   if (scope === "everyone") return { scope: "default", id: "all" };
-  if (scope === "demo") return { scope: "users", id: DEMO_IDS[0] };
   if (scope === "users") {
     var v = $("uidSel").value;
     return { scope: "users", id: v === "other" ? $("uid").value.trim() : v };
@@ -404,6 +402,25 @@ function addOpt(sel, value, text) {
   sel.appendChild(o);
 }
 
+// Builds the user dropdown from known names + every user id saved in config.json
+function buildUsers(selectId) {
+  var sel = $("uidSel");
+  var ids = Object.keys(USERS);
+  Object.keys((CFG && CFG.users) || {}).forEach(function (id) {
+    if (ids.indexOf(id) === -1) ids.push(id);
+  });
+  sel.innerHTML = "";
+  addOpt(sel, "", "Choose a user");
+  ids.forEach(function (id) {
+    addOpt(sel, id, USERS[id] || ("User " + id));
+  });
+  addOpt(sel, "other", "Other user (paste ID)");
+  if (selectId && ids.indexOf(selectId) > -1) {
+    sel.value = selectId;
+    $("uid").classList.add("hidden");
+  }
+}
+
 function start() {
   api("locations").then(function (list) {
     $("login").classList.add("hidden");
@@ -412,13 +429,11 @@ function start() {
     $("loc").innerHTML = "";
     addOpt($("loc"), "", "Choose a sub-account");
     list.forEach(function (l) { addOpt($("loc"), l.id, l.name); });
-    $("uidSel").innerHTML = "";
-    addOpt($("uidSel"), "", "Choose a user");
-    Object.keys(USERS).forEach(function (id) { addOpt($("uidSel"), id, USERS[id]); });
-    addOpt($("uidSel"), "other", "Other user (paste ID)");
     return api("config");
-  }).then(function (cfg) { CFG = cfg; })
-  .catch(function (e) {
+  }).then(function (cfg) {
+    CFG = cfg;
+    buildUsers();
+  }).catch(function (e) {
     sessionStorage.removeItem("adminPw");
     $("app").classList.add("hidden");
     $("login").classList.remove("hidden");
@@ -436,11 +451,10 @@ $("scope").onchange = function () {
   var sc = $("scope").value;
   $("locBox").classList.toggle("hidden", sc !== "subaccounts");
   $("userBox").classList.toggle("hidden", sc !== "users");
-  $("demoNote").classList.toggle("hidden", sc !== "demo");
   $("everyoneNote").classList.toggle("hidden", sc !== "everyone");
   $("studio").classList.add("hidden");
   say("");
-  if (sc === "demo" || sc === "everyone") fill();
+  if (sc === "everyone") fill();
 };
 $("loc").onchange = fill;
 $("uidSel").onchange = function () {
@@ -465,11 +479,13 @@ $("save").onclick = function () {
   if (!t.id) { say("Choose who the settings are for first.", "err"); return; }
   var settings = collect();
   say("Saving...");
-  var ids = $("scope").value === "demo" ? DEMO_IDS : [t.id];
-  ids.reduce(function (p, id) {
-    return p.then(function () { return api("save", { scope: t.scope, id: id, settings: settings }); });
-  }, Promise.resolve())
-    .then(function () { say("Saved" + (ids.length > 1 ? " for " + ids.length + " users" : "") + ". The sidebar updates in about a minute.", "ok"); })
+  api("save", { scope: t.scope, id: t.id, settings: settings })
+    .then(function () {
+      say("Saved. The sidebar updates in about a minute.", "ok");
+      if (t.scope === "users") {
+        return api("config").then(function (cfg) { CFG = cfg; buildUsers(t.id); });
+      }
+    })
     .catch(function (e) { say(e.message, "err"); });
 };
 
