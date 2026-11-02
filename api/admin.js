@@ -26,18 +26,56 @@ const isEmpty = (v) =>
   (Array.isArray(v) && !v.length) ||
   (typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length);
 
-module.exports = async (req, res) => {
-  
+// Used only if GHL_TOKEN / GHL_COMPANY_ID are not set, or GHL call fails
+const FALLBACK = [
+  { id: "BUgWVdqLMd3RZYncJ0VV", name: "Sidvin Celeste" },
+  { id: "NxLoq60TfQJ0yNAm3tK3", name: "Realtee" },
+  { id: "byaCGrVxZtJJwdTAddVM", name: "Sidvin developers" },
+  { id: "Zi3agfEBlJBtgFbvGEOp", name: "Elpro360.ai" },
+];
+
+async function getLocations() {
+  const token = process.env.GHL_TOKEN;
+  const company = process.env.GHL_COMPANY_ID;
+  if (!token || !company) return FALLBACK;
+  const out = [];
   try {
+    for (let skip = 0; skip < 2000; skip += 100) {
+      const r = await fetch(
+        "https://services.leadconnectorhq.com/locations/search?companyId=" +
+          encodeURIComponent(company) + "&limit=100&skip=" + skip,
+        {
+          headers: {
+            Authorization: "Bearer " + token,
+            Version: "2021-07-28",
+            Accept: "application/json",
+          },
+        }
+      );
+      if (!r.ok) return out.length ? out : FALLBACK;
+      const j = await r.json();
+      const list = j.locations || [];
+      list.forEach((l) => out.push({ id: l.id, name: l.name }));
+      if (list.length < 100) break;
+    }
+  } catch (e) {
+    return out.length ? out : FALLBACK;
+  }
+  return out.length ? out : FALLBACK;
+}
+
+module.exports = async (req, res) => {
+  try {
+    // Password check: works only if ADMIN_PASSWORD is set in Vercel
+    const need = process.env.ADMIN_PASSWORD;
+    if (need && req.headers["x-admin-password"] !== need) {
+      return res.status(401).json({ error: "Wrong password" });
+    }
+
     const action = req.query.action;
 
     if (action === "locations") {
-      return res.json([
-        { id: "BUgWVdqLMd3RZYncJ0VV", name: "Sidvin Celeste" },
-        { id: "NxLoq60TfQJ0yNAm3tK3", name: "Realtee" },
-        { id: "byaCGrVxZtJJwdTAddVM", name: "Sidvin developers" },
-        { id: "Zi3agfEBlJBtgFbvGEOp", name: "Elpro360.ai" },
-      ]);
+      return res.json(await getLocations());
     }
 
     if (action === "config") {
