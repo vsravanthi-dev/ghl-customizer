@@ -27,9 +27,7 @@ const isEmpty = (v) =>
   (typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length);
 
 module.exports = async (req, res) => {
-  if (req.headers["x-admin-password"] !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: "Wrong password" });
-  }
+  
   try {
     const action = req.query.action;
 
