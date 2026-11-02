@@ -178,9 +178,10 @@ var MENUS = [
   { id: "sb_settings", title: "Settings" }
 ];
 var SUBS = [
-  "My Profile","Business Profile","Billing","My Staff","Opportunities & Pipelines","Companies",
-  "Calendars","Phone Numbers","Phone System","Email Services","Custom Fields","Custom Values",
-  "Tags","Integrations","Private Integrations","Domains","Labs","Audit Logs","Brand Boards","Reputation"
+  "Business Profile","My Profile","Billing","Users","Opportunities & Pipelines",
+  "Calendars","Email Services","WhatsApp","Objects","Custom Fields","Custom Values",
+  "Import Data","Manage Scoring","Domains & URL Redirects","External Tracking",
+  "Integrations","Private Integrations","Conversation Providers","Tags","Labs","Brand Boards"
 ].map(function (t) { return { id: "sub_" + t, title: t, byTitle: true, sub: true }; });
 var ALL = MENUS.concat(SUBS);
 var COLORS = [
@@ -320,13 +321,23 @@ function renderPreview() {
   }
   var list = $("pvList");
   list.innerHTML = "";
+  var onSub = !$("panelSub").classList.contains("hidden");
+  var items = onSub ? SUBS : MENUS;
+  if (onSub) {
+    var h = document.createElement("div");
+    h.className = "pvitem";
+    h.style.color = txt;
+    h.style.opacity = ".7";
+    h.textContent = "SETTINGS";
+    list.appendChild(h);
+  }
   var first = true;
-  MENUS.forEach(function (m) {
+  items.forEach(function (m) {
     if (m.hidden) return;
     var d = document.createElement("div");
     d.className = "pvitem";
     d.textContent = (m.name || "").trim() || m.title;
-    if (first) { d.style.background = "#ffffff"; d.style.color = act; first = false; }
+    if (first && !onSub) { d.style.background = "#ffffff"; d.style.color = act; first = false; }
     else d.style.color = txt;
     list.appendChild(d);
   });
@@ -517,6 +528,7 @@ function tab(which) {
   $("tabSub").classList.toggle("on", which === "sub");
   $("tabMenu").classList.toggle("on", which === "menu");
   $("tabTheme").classList.toggle("on", which === "theme");
+  renderPreview();
 }
 $("tabMenu").onclick = function () { tab("menu"); };
 $("tabSub").onclick = function () { tab("sub"); };
