@@ -110,6 +110,53 @@ module.exports = async (req, res) => {
       return res.json({ ok: true });
     }
 
+    if (action === "bulk" && req.method === "POST") {
+      // Show or hide ONE menu for everyone (default + every sub-account + every user)
+      const { id, title, byTitle, mode } = req.body || {};
+      if (!id || !title || !["show", "hide"].includes(mode)) {
+        return res.status(400).json({ error: "Missing data" });
+      }
+      const key = byTitle ? title : id;
+      const hideField = byTitle ? "hideMenuTitles" : "hideMenus";
+      const without = (arr) => (arr || []).filter((x) => x !== key);
+      const { cfg, sha } = await readConfig();
+
+      // 1) the "Everyone" level
+      cfg.default = cfg.default || {};
+      cfg.default[hideField] = without(cfg.default[hideField]);
+      if (mode === "hide") cfg.default[hideField].push(key);
+      cfg.default.showMenus = without(cfg.default.showMenus);
+      ["hideMenus", "hideMenuTitles", "showMenus"].forEach((f) => {
+        if (!cfg.default[f] || !cfg.default[f].length) delete cfg.default[f];
+      });
+
+      // 2) clear this menu from every sub-account and user, so they follow "Everyone"
+      ["subaccounts", "users"].forEach((scope) => {
+        Object.keys(cfg[scope] || {}).forEach((k) => {
+          const o = cfg[scope][k];
+          ["hideMenus", "hideMenuTitles", "showMenus"].forEach((f) => {
+            if (Array.isArray(o[f])) {
+              o[f] = o[f].filter((x) => x !== key);
+              if (!o[f].length) delete o[f];
+            }
+          });
+          if (!Object.keys(o).length) delete cfg[scope][k];
+        });
+      });
+
+      const put = await gh(FILE, {
+        method: "PUT",
+        body: JSON.stringify({
+          message: (mode === "hide" ? "Hide " : "Show ") + title + " for all (admin page)",
+          content: Buffer.from(JSON.stringify(cfg, null, 2)).toString("base64"),
+          sha,
+          branch: "main",
+        }),
+      });
+      if (!put.ok) return res.status(502).json({ error: "GitHub save failed (" + put.status + ")" });
+      return res.json({ ok: true });
+    }
+
     res.status(400).json({ error: "Unknown action" });
   } catch (e) {
     res.status(500).json({ error: e.message });
