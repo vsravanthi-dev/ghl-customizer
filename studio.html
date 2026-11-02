@@ -26,16 +26,13 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .tab{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 16px;font:inherit;font-weight:600;cursor:pointer}
 .tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 @media (prefers-color-scheme:dark){.tab.on{color:#06231f}}
-.mrow{display:grid;grid-template-columns:34px 1fr 1fr 96px auto;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
+.mrow{display:grid;grid-template-columns:34px 1fr 1fr 96px;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
 .mrow.off .mtitle{opacity:.45;text-decoration:line-through}
 .mtitle{font-weight:600}
 .eye{background:transparent;border:1px solid var(--line);border-radius:8px;width:34px;height:34px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .mrow.off .eye{color:var(--mute);background:var(--bg)}
 .badge{font-size:12px;color:var(--mute);background:var(--bg);border-radius:6px;padding:0 6px;text-align:center}
 .badge:empty{visibility:hidden}
-.bulk{display:flex;gap:6px}
-.mini{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:4px 8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
-.mini:hover{border-color:var(--accent)}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
 .cfield .row2{display:flex;gap:8px}
 .cfield input[type=color]{width:44px;height:36px;padding:2px;border:1px solid var(--line);border-radius:7px;background:var(--bg);cursor:pointer}
@@ -55,7 +52,16 @@ summary{cursor:pointer;font-weight:600}
 #pvLogo{margin:0 6px 12px;min-height:34px}
 #pvLogo img{max-height:42px;max-width:100%;background:#fff;border-radius:6px;padding:3px 5px}
 .pvitem{padding:8px 10px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:2px}
-@media(max-width:760px){.studio{grid-template-columns:1fr}.pvwrap{position:static}.bar{grid-template-columns:1fr}.mrow{grid-template-columns:34px 1fr 1fr}.badge{display:none}.bulk{grid-column:1/-1}.cgrid{grid-template-columns:1fr}}
+@media(max-width:760px){.studio{grid-template-columns:1fr}.pvwrap{position:static}.bar{grid-template-columns:1fr}.mrow{grid-template-columns:34px 1fr 1fr}.badge{display:none}.cgrid{grid-template-columns:1fr}}
+.mrow.norename{grid-template-columns:34px 1fr 96px}
+.sechead{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+.sechead h3{margin:0}
+.bulk{display:flex;gap:6px}
+.mini{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:4px 10px;font:inherit;font-size:13px;cursor:pointer}
+.ulist{max-height:190px;overflow:auto;border:1px solid var(--line);border-radius:7px;background:var(--bg);padding:2px 10px}
+.uitem{display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0;cursor:pointer}
+.ubtns{display:flex;gap:6px;margin-top:6px;align-items:center}
+@media(max-width:760px){.mrow.norename{grid-template-columns:34px 1fr}}
 </style>
 </head>
 <body>
@@ -77,7 +83,7 @@ summary{cursor:pointer;font-weight:600}
           <label for="scope" style="margin-top:0">Settings for</label>
           <select id="scope">
             <option value="subaccounts">A sub-account</option>
-            <option value="users">A specific user (in every sub-account)</option>
+            <option value="users">Users (in every sub-account)</option>
             <option value="everyone">Everyone (all sub-accounts and users)</option>
           </select>
         </div>
@@ -87,13 +93,18 @@ summary{cursor:pointer;font-weight:600}
             <select id="loc"></select>
           </div>
           <div id="userBox" class="hidden">
-            <label for="uidSel" style="margin-top:0">User</label>
-            <input type="text" id="userSearch" placeholder="Search users by name" style="margin-bottom:8px">
-            <select id="uidSel"></select>
-            <input type="text" id="uid" class="hidden" placeholder="Paste a user ID" style="margin-top:8px">
-            <div id="userNote" class="hint" style="margin-top:6px"></div>
+            <label style="margin-top:0">Users <span class="hint">tick one or more</span></label>
+            <div id="userList" class="ulist"></div>
+            <div class="ubtns">
+              <button type="button" class="mini" id="uAll">Select all</button>
+              <button type="button" class="mini" id="uNone">Clear</button>
+              <span id="userCount" class="hint"></span>
+            </div>
+            <input type="text" id="uid" placeholder="Other user IDs, separated by commas" style="margin-top:8px">
+            <div class="hint" style="margin-top:6px">The form shows the first ticked user's settings. Saving copies the form to every ticked user.</div>
           </div>
           <div id="everyoneNote" class="hidden hint" style="margin-top:6px">These settings apply to every sub-account and user. A sub-account can still override them.</div>
+          <div id="srcNote" class="hint" style="margin-top:6px"></div>
         </div>
       </div>
     </div>
@@ -102,13 +113,28 @@ summary{cursor:pointer;font-weight:600}
       <div class="card">
         <div class="tabs">
           <button type="button" class="tab on" id="tabMenu">Menu</button>
-          <button type="button" class="tab" id="tabSub">Sub-menus</button>
           <button type="button" class="tab" id="tabTheme">Theme</button>
         </div>
 
         <div id="panelMenu">
           <div class="hint">Click the eye to hide or show a menu. Type in the second box to rename it.</div>
+          <div class="sechead">
+            <h3>Main menu</h3>
+            <span class="bulk">
+              <button type="button" class="mini" id="bMainShow">Show all</button>
+              <button type="button" class="mini" id="bMainHide">Hide all</button>
+            </span>
+          </div>
           <div id="menuList"></div>
+          <div class="sechead">
+            <h3>Settings menu</h3>
+            <span class="bulk">
+              <button type="button" class="mini" id="bSetShow">Show all</button>
+              <button type="button" class="mini" id="bSetHide">Hide all</button>
+            </span>
+          </div>
+          <div class="hint">Items inside Settings. Click the eye to hide or show.</div>
+          <div id="settingsList"></div>
           <details>
             <summary>Advanced</summary>
             <label for="extraIds">Other hidden menu ids <span class="hint">separated by commas, like sb_reputation</span></label>
@@ -119,12 +145,11 @@ summary{cursor:pointer;font-weight:600}
             <input type="text" id="hideHeadings">
             <label for="moveMenus">Menu order <span class="hint">one per line, like DashBoard before Conversations</span></label>
             <textarea id="moveMenus"></textarea>
+            <label for="textReplace">Replace text <span class="hint">one per line, like Opportunities =&gt; Sales Pipeline</span></label>
+            <textarea id="textReplace"></textarea>
+            <label for="hideSelectors">Hide by CSS selector <span class="hint">one per line, like a[href*='/reputation']</span></label>
+            <textarea id="hideSelectors"></textarea>
           </details>
-        </div>
-
-        <div id="panelSub" class="hidden">
-          <div class="hint">Items inside Settings and other pages. Click the eye to hide or show. If a name is not listed, add it in Menu tab, Advanced, "Other hidden menus by name" (type it exactly as in the sidebar).</div>
-          <div id="subList"></div>
         </div>
 
         <div id="panelTheme" class="hidden">
@@ -158,9 +183,15 @@ var pw = sessionStorage.getItem("adminPw") || "";
 var CFG = null;
 var EXTRA_NAMES = {};
 var EXTRA_SHOW = [];
-// Filled live from GoHighLevel (see api/admin.js, action=users)
-var USERS = {};
-var USER_NOTE = "";
+var USERS = {
+  "zn75wx7Yp68SsLbZ7Ee0": "Arjun Shetty",
+  "eHSTNuzvw9Vek4jMknK1": "Kavya Nair",
+  "BYNHWalUytfAzIF53Msw": "Meera Rao",
+  "C9b8vqSkoqyL0iq3Z2nm": "Rohan Gowda",
+  "R9k3EzZkDANa4emKSizB": "Sneha Iyer",
+  "vtEMaPhf7DS8CH30gakW": "Vikas Hedge"
+};
+var lastFill = "";
 var MENUS = [
   { id: "sb_dashboard", title: "Dashboard" },
   { id: "sb_conversations", title: "Conversations" },
@@ -172,18 +203,25 @@ var MENUS = [
   { id: "sb_email-marketing", title: "Marketing" },
   { id: "sb_automation", title: "Automation" },
   { id: "sb_sites", title: "Sites" },
+  { id: "sb_Memberships", title: "Memberships", byTitle: true },
   { id: "sb_app-media", title: "Media Storage" },
   { id: "sb_reporting", title: "Reporting" },
   { id: "sb_app-marketplace", title: "App Marketplace" },
+  { id: "sb_Mobile App", title: "Mobile App", byTitle: true },
+  { id: "sb_whatsapp", title: "WhatsApp" },
   { id: "sb_settings", title: "Settings" }
 ];
-var SUBS = [
-  "Business Profile","My Profile","Billing","Users","Opportunities & Pipelines",
-  "Calendars","Email Services","WhatsApp","Objects","Custom Fields","Custom Values",
-  "Import Data","Manage Scoring","Domains & URL Redirects","External Tracking",
-  "Integrations","Private Integrations","Conversation Providers","Tags","Labs","Brand Boards"
-].map(function (t) { return { id: "sub_" + t, title: t, byTitle: true, sub: true }; });
-var ALL = MENUS.concat(SUBS);
+// Items inside Settings. Titles are guessed from the ids, so check them against GHL.
+var SETTINGS_MENUS = [
+  { id: "sb_manage-scoring", title: "Manage Scoring" },
+  { id: "sb_manage-preferences", title: "Manage Preferences" },
+  { id: "sb_domains-urlRedirects", title: "Domains & URL Redirects" },
+  { id: "sb_external-tracking", title: "External Tracking" },
+  { id: "sb_objects", title: "Objects" },
+  { id: "sb_labs", title: "Labs" },
+  { id: "sb_saas-billing", title: "SaaS Billing" },
+  { id: "sb_conversations_providers", title: "Conversation Providers" }
+];
 var COLORS = [
   ["brandColor", "Sidebar", "#1e293b"],
   ["textColor", "Menu text", "#ffffff"],
@@ -216,6 +254,7 @@ function api(action, body) {
 function say(text, cls) { $("msg").textContent = text; $("msg").className = cls || ""; }
 function csv(s) { return s.split(",").map(function (x) { return x.trim(); }).filter(Boolean); }
 function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
+function allMenus() { return MENUS.concat(SETTINGS_MENUS); }
 function dflt(k, fb) { var d = (CFG && CFG.default) || {}; return d[k] || fb; }
 
 function colorVal(k, fb) {
@@ -271,13 +310,12 @@ function buildColors() {
   });
 }
 
-function renderRows() { drawRows(MENUS, "menuList"); drawRows(SUBS, "subList"); }
-function drawRows(list, boxId) {
+function renderList(boxId, list, canRename) {
   var box = $(boxId);
   box.innerHTML = "";
   list.forEach(function (m) {
     var row = document.createElement("div");
-    row.className = "mrow" + (m.hidden ? " off" : "");
+    row.className = "mrow" + (m.hidden ? " off" : "") + (canRename ? "" : " norename");
     var eye = document.createElement("button");
     eye.type = "button"; eye.className = "eye";
     eye.innerHTML = m.hidden ? EYEOFF : EYE;
@@ -285,25 +323,29 @@ function drawRows(list, boxId) {
     eye.onclick = function () { m.hidden = !m.hidden; renderRows(); renderPreview(); };
     var t = document.createElement("span");
     t.className = "mtitle"; t.textContent = m.title;
-    var inp = document.createElement("input");
-    inp.type = "text"; inp.placeholder = "Rename"; inp.value = m.name || "";
-    inp.oninput = function () { m.name = inp.value; renderPreview(); };
-    if (m.sub) inp.style.visibility = "hidden";
+    row.appendChild(eye); row.appendChild(t);
+    if (canRename) {
+      var inp = document.createElement("input");
+      inp.type = "text"; inp.placeholder = "Rename"; inp.value = m.name || "";
+      if (m.byTitle) { inp.disabled = true; inp.placeholder = "Rename not available"; }
+      inp.oninput = function () { m.name = inp.value; renderPreview(); };
+      row.appendChild(inp);
+    }
     var b = document.createElement("span");
     b.className = "badge";
     b.textContent = m.hidden ? (m.baseHidden ? "Hidden (all)" : "Hidden") : (m.baseHidden ? "Shown here" : "");
-    var bk = document.createElement("span");
-    bk.className = "bulk";
-    [["show", "Show all"], ["hide", "Hide all"]].forEach(function (x) {
-      var bt = document.createElement("button");
-      bt.type = "button"; bt.className = "mini"; bt.textContent = x[1];
-      bt.title = x[1] + ": " + m.title + " for every sub-account and user";
-      bt.onclick = function () { bulkMenu(m, x[0]); };
-      bk.appendChild(bt);
-    });
-    row.appendChild(eye); row.appendChild(t); row.appendChild(inp); row.appendChild(b); row.appendChild(bk);
+    row.appendChild(b);
     box.appendChild(row);
   });
+}
+function renderRows() {
+  renderList("menuList", MENUS, true);
+  renderList("settingsList", SETTINGS_MENUS, false);
+}
+function setAll(list, hide) {
+  list.forEach(function (m) { m.hidden = hide; });
+  renderRows();
+  renderPreview();
 }
 
 function renderPreview() {
@@ -321,23 +363,13 @@ function renderPreview() {
   }
   var list = $("pvList");
   list.innerHTML = "";
-  var onSub = !$("panelSub").classList.contains("hidden");
-  var items = onSub ? SUBS : MENUS;
-  if (onSub) {
-    var h = document.createElement("div");
-    h.className = "pvitem";
-    h.style.color = txt;
-    h.style.opacity = ".7";
-    h.textContent = "SETTINGS";
-    list.appendChild(h);
-  }
   var first = true;
-  items.forEach(function (m) {
+  MENUS.forEach(function (m) {
     if (m.hidden) return;
     var d = document.createElement("div");
     d.className = "pvitem";
     d.textContent = (m.name || "").trim() || m.title;
-    if (first && !onSub) { d.style.background = "#ffffff"; d.style.color = act; first = false; }
+    if (first) { d.style.background = "#ffffff"; d.style.color = act; first = false; }
     else d.style.color = txt;
     list.appendChild(d);
   });
@@ -353,7 +385,7 @@ function loadSettings(s, isDefault) {
   var baseTitles = base.hideMenuTitles || [];
   var known = {};
   var keys = {};
-  ALL.forEach(function (m) {
+  allMenus().forEach(function (m) {
     known[m.id] = true;
     var key = m.byTitle ? m.title : m.id;
     keys[key] = true;
@@ -363,12 +395,15 @@ function loadSettings(s, isDefault) {
     m.name = names[m.id] || "";
   });
   EXTRA_SHOW = show.filter(function (k) { return !keys[k]; });
-  var byTitleNames = ALL.filter(function (m) { return m.byTitle; }).map(function (m) { return m.title; });
+  var byTitleNames = MENUS.filter(function (m) { return m.byTitle; }).map(function (m) { return m.title; });
   $("extraIds").value = ids.filter(function (id) { return !known[id]; }).join(", ");
   $("extraTitles").value = titles.filter(function (t) { return byTitleNames.indexOf(t) === -1; }).join(", ");
   EXTRA_NAMES = {};
   Object.keys(names).forEach(function (id) { if (!known[id]) EXTRA_NAMES[id] = names[id]; });
   $("hideHeadings").value = (s.hideHeadings || []).join(", ");
+  var tr = s.textReplace || {};
+  $("textReplace").value = Object.keys(tr).map(function (k) { return k + " => " + tr[k]; }).join("\n");
+  $("hideSelectors").value = (s.hideSelectors || []).join("\n");
   $("moveMenus").value = (s.moveMenus || []).map(function (m) { return m.title + " before " + m.before; }).join("\n");
   $("logoUrl").value = s.logoUrl || "";
   COLORS.forEach(function (c) { setColor(c[0], s[c[0]]); });
@@ -383,7 +418,7 @@ function collect() {
   s.logoUrl = $("logoUrl").value.trim();
   s.whiteIcons = $("whiteIcons").checked;
   var hideIds = [], hideTitles = [], showKeys = [];
-  ALL.forEach(function (m) {
+  allMenus().forEach(function (m) {
     if (m.hidden && !m.baseHidden) { if (m.byTitle) hideTitles.push(m.title); else hideIds.push(m.id); }
     else if (!m.hidden && m.baseHidden) showKeys.push(m.byTitle ? m.title : m.id);
   });
@@ -403,33 +438,37 @@ function collect() {
     if (p.length === 2 && p[0].trim() && p[1].trim()) moves.push({ title: p[0].trim(), before: p[1].trim() });
   });
   s.moveMenus = moves;
+  var tr = {};
+  $("textReplace").value.split("\n").forEach(function (line) {
+    var i = line.indexOf("=>");
+    if (i < 0) return;
+    var a = line.slice(0, i).trim(), b = line.slice(i + 2).trim();
+    if (a && b) tr[a] = b;
+  });
+  s.textReplace = tr;
+  s.hideSelectors = $("hideSelectors").value.split("\n").map(function (x) { return x.trim(); }).filter(Boolean);
   return s;
 }
 
-function bulkMenu(m, mode) {
-  var word = mode === "hide" ? "Hide" : "Show";
-  if (!confirm(word + " \"" + m.title + "\" for EVERYONE (all sub-accounts and all users)?\n\nThis replaces any setting for this menu in every sub-account and user. Unsaved changes on this screen will be lost.")) return;
-  say("Saving...");
-  api("bulk", { id: m.id, title: m.title, byTitle: !!m.byTitle, mode: mode })
-    .then(function () {
-      say(word + " \"" + m.title + "\" saved for everyone. The sidebar updates in about a minute.", "ok");
-      fill();
-    })
-    .catch(function (e) { say(e.message, "err"); });
+function selectedUsers() {
+  var ids = Array.prototype.slice.call(document.querySelectorAll("#userList input:checked")).map(function (c) { return c.value; });
+  return uniq(ids.concat(csv($("uid").value)));
 }
 
 function target() {
   var scope = $("scope").value;
-  if (scope === "everyone") return { scope: "default", id: "all" };
+  if (scope === "everyone") return { scope: "default", id: "all", ids: ["all"] };
   if (scope === "users") {
-    var v = $("uidSel").value;
-    return { scope: "users", id: v === "other" ? $("uid").value.trim() : v };
+    var ids = selectedUsers();
+    return { scope: "users", id: ids[0] || "", ids: ids };
   }
-  return { scope: "subaccounts", id: $("loc").value };
+  var l = $("loc").value;
+  return { scope: "subaccounts", id: l, ids: l ? [l] : [] };
 }
 
 function fill() {
   var t = target();
+  lastFill = t.id;
   say("");
   if (!t.id) { $("studio").classList.add("hidden"); return; }
   api("config").then(function (cfg) {
@@ -440,37 +479,43 @@ function fill() {
   }).catch(function (e) { say(e.message, "err"); });
 }
 
+function userChanged() {
+  var ids = selectedUsers();
+  $("userCount").textContent = ids.length ? ids.length + " selected" : "";
+  if ((ids[0] || "") !== lastFill) fill();
+}
+
 function addOpt(sel, value, text) {
   var o = document.createElement("option");
   o.value = value; o.textContent = text;
   sel.appendChild(o);
 }
 
-// User dropdown: real users from GHL + any user id already saved in config.json.
-// The search box filters by name. The selected user is always kept in the list.
-function buildUsers(selectId) {
-  var sel = $("uidSel");
-  var q = $("userSearch").value.trim().toLowerCase();
-  var keep = selectId || (sel.value && sel.value !== "other" ? sel.value : "");
-  var ids = Object.keys(USERS);
-  Object.keys((CFG && CFG.users) || {}).forEach(function (id) {
-    if (ids.indexOf(id) === -1) ids.push(id);
+function buildUsers() {
+  var ul = $("userList");
+  ul.innerHTML = "";
+  Object.keys(USERS).forEach(function (id) {
+    var l = document.createElement("label");
+    l.className = "uitem";
+    var c = document.createElement("input");
+    c.type = "checkbox"; c.value = id;
+    c.onchange = userChanged;
+    l.appendChild(c);
+    l.appendChild(document.createTextNode(USERS[id]));
+    ul.appendChild(l);
   });
-  var label = function (id) { return USERS[id] || ("User " + id); };
-  ids.sort(function (a, b) { return label(a).localeCompare(label(b)); });
-  sel.innerHTML = "";
-  addOpt(sel, "", "Choose a user");
-  ids.forEach(function (id) {
-    if (q && label(id).toLowerCase().indexOf(q) === -1 && id !== keep) return;
-    addOpt(sel, id, label(id));
-  });
-  addOpt(sel, "other", "Other user (paste ID)");
-  if (keep && ids.indexOf(keep) > -1) {
-    sel.value = keep;
-    $("uid").classList.add("hidden");
-  }
-  $("userNote").textContent = Object.keys(USERS).length ? "" :
-    "Could not load users from GoHighLevel" + (USER_NOTE ? " (" + USER_NOTE + ")" : "") + ". Use Other user (paste ID).";
+}
+
+function showStatus(st) {
+  var parts = [];
+  parts.push(st.locations.source === "ghl"
+    ? "Sub-accounts load automatically (" + st.locations.count + ")."
+    : "Sub-account list is fixed. Add GHL_TOKEN and GHL_COMPANY_ID in Vercel to load new sub-accounts automatically.");
+  parts.push(st.users.source === "ghl"
+    ? "Users load automatically (" + st.users.count + ")."
+    : "User list is fixed.");
+  if (!st.passwordSet) parts.push("No password is set, so anyone with this link can change branding.");
+  $("srcNote").textContent = parts.join(" ");
 }
 
 function start() {
@@ -481,16 +526,18 @@ function start() {
     $("loc").innerHTML = "";
     addOpt($("loc"), "", "Choose a sub-account");
     list.forEach(function (l) { addOpt($("loc"), l.id, l.name); });
-    return api("config");
-  }).then(function (cfg) {
-    CFG = cfg;
-    return api("users").catch(function (e) { return { users: [], note: e.message }; });
-  }).then(function (r) {
-    USERS = {};
-    (r.users || []).forEach(function (u) { USERS[u.id] = u.name; });
-    USER_NOTE = r.note || "";
+    return api("users").then(function (u) {
+      if (Array.isArray(u) && u.length) {
+        USERS = {};
+        u.forEach(function (x) { USERS[x.id] = x.name; });
+      }
+    }).catch(function () {});
+  }).then(function () {
     buildUsers();
-  }).catch(function (e) {
+    return api("status").then(showStatus).catch(function () {});
+  }).then(function () { return api("config"); })
+  .then(function (cfg) { CFG = cfg; })
+  .catch(function (e) {
     sessionStorage.removeItem("adminPw");
     $("app").classList.add("hidden");
     $("login").classList.remove("hidden");
@@ -510,44 +557,45 @@ $("scope").onchange = function () {
   $("userBox").classList.toggle("hidden", sc !== "users");
   $("everyoneNote").classList.toggle("hidden", sc !== "everyone");
   $("studio").classList.add("hidden");
+  lastFill = "";
   say("");
   if (sc === "everyone") fill();
+  else if (sc === "users") userChanged();
+  else if ($("loc").value) fill();
 };
 $("loc").onchange = fill;
-$("uidSel").onchange = function () {
-  $("uid").classList.toggle("hidden", $("uidSel").value !== "other");
-  fill();
+$("uid").onchange = userChanged;
+$("uAll").onclick = function () {
+  document.querySelectorAll("#userList input").forEach(function (c) { c.checked = true; });
+  userChanged();
 };
-$("userSearch").oninput = function () { buildUsers(); };
-$("uid").onchange = fill;
+$("uNone").onclick = function () {
+  document.querySelectorAll("#userList input").forEach(function (c) { c.checked = false; });
+  userChanged();
+};
+$("bMainShow").onclick = function () { setAll(MENUS, false); };
+$("bMainHide").onclick = function () { setAll(MENUS, true); };
+$("bSetShow").onclick = function () { setAll(SETTINGS_MENUS, false); };
+$("bSetHide").onclick = function () { setAll(SETTINGS_MENUS, true); };
 
 function tab(which) {
   $("panelMenu").classList.toggle("hidden", which !== "menu");
   $("panelTheme").classList.toggle("hidden", which !== "theme");
-  $("panelSub").classList.toggle("hidden", which !== "sub");
-  $("tabSub").classList.toggle("on", which === "sub");
   $("tabMenu").classList.toggle("on", which === "menu");
   $("tabTheme").classList.toggle("on", which === "theme");
-  renderPreview();
 }
 $("tabMenu").onclick = function () { tab("menu"); };
-$("tabSub").onclick = function () { tab("sub"); };
 $("tabTheme").onclick = function () { tab("theme"); };
 $("logoUrl").oninput = renderPreview;
 ["extraIds", "extraTitles"].forEach(function (id) { $(id).oninput = renderPreview; });
 
 $("save").onclick = function () {
   var t = target();
-  if (!t.id) { say("Choose who the settings are for first.", "err"); return; }
+  if (!t.ids.length) { say("Choose who the settings are for first.", "err"); return; }
   var settings = collect();
   say("Saving...");
-  api("save", { scope: t.scope, id: t.id, settings: settings })
-    .then(function () {
-      say("Saved. The sidebar updates in about a minute.", "ok");
-      if (t.scope === "users") {
-        return api("config").then(function (cfg) { CFG = cfg; buildUsers(t.id); });
-      }
-    })
+  api("save", { scope: t.scope, id: t.ids[0], ids: t.ids, settings: settings })
+    .then(function () { say("Saved" + (t.scope === "users" && t.ids.length > 1 ? " for " + t.ids.length + " users" : "") + ". The sidebar updates in about a minute.", "ok"); })
     .catch(function (e) { say(e.message, "err"); });
 };
 
