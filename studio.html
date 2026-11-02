@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand Studio</title>
+<style>
+:root{--bg:#eef1f5;--card:#fff;--ink:#17202e;--mute:#5d6b80;--line:#d6dce5;--accent:#0f766e;--soft:#e6f4f2}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1420;--card:#18202e;--ink:#eef2f7;--mute:#98a4b8;--line:#2c3648;--accent:#2dd4bf;--soft:#12332f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+main{max-width:1000px;margin:28px auto;padding:0 16px}
+h1{font-size:24px;margin:0 0 2px}
+h3{font-size:14px;margin:22px 0 8px}
+.sub{color:var(--mute);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+label{display:block;font-weight:600;margin:12px 0 5px}
+.hint{color:var(--mute);font-weight:400;font-size:13px}
+input[type=text],input[type=password],select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:60px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.hidden{display:none!important}
+.bar{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.studio{display:grid;grid-template-columns:1fr 280px;gap:16px;align-items:start}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 16px;font:inherit;font-weight:600;cursor:pointer}
+.tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+@media (prefers-color-scheme:dark){.tab.on{color:#06231f}}
+.mrow{display:grid;grid-template-columns:34px 1fr 1fr 60px;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
+.mrow.off .mtitle{opacity:.45;text-decoration:line-through}
+.mtitle{font-weight:600}
+.eye{background:transparent;border:1px solid var(--line);border-radius:8px;width:34px;height:34px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.mrow.off .eye{color:var(--mute);background:var(--bg)}
+.badge{font-size:12px;color:var(--mute);background:var(--bg);border-radius:6px;padding:0 6px;text-align:center}
+.mrow:not(.off) .badge{visibility:hidden}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+.cfield .row2{display:flex;gap:8px}
+.cfield input[type=color]{width:44px;height:36px;padding:2px;border:1px solid var(--line);border-radius:7px;background:var(--bg);cursor:pointer}
+.presets{display:flex;gap:10px;flex-wrap:wrap}
+.preset{display:flex;gap:8px;align-items:center;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 12px;font:inherit;cursor:pointer}
+.sw{width:18px;height:18px;border-radius:5px;display:inline-block}
+.check{display:flex;gap:8px;align-items:center;font-weight:600;margin-top:14px}
+details{margin-top:18px}
+summary{cursor:pointer;font-weight:600}
+.go{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 22px;font:inherit;font-weight:600;cursor:pointer;margin-top:18px}
+@media (prefers-color-scheme:dark){.go{color:#06231f}}
+#msg,#msg1{margin-top:12px;font-weight:600;min-height:1.4em}
+.err{color:#c0392b}.ok{color:var(--accent)}
+.pvwrap{position:sticky;top:12px}
+.pvhead{font-weight:700;margin-bottom:8px}
+#pv{border-radius:12px;padding:14px 10px;min-height:340px}
+#pvLogo{margin:0 6px 12px;min-height:34px}
+#pvLogo img{max-height:42px;max-width:100%;background:#fff;border-radius:6px;padding:3px 5px}
+.pvitem{padding:8px 10px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:2px}
+@media(max-width:760px){.studio{grid-template-columns:1fr}.pvwrap{position:static}.bar{grid-template-columns:1fr}.mrow{grid-template-columns:34px 1fr 1fr}.badge{display:none}.cgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Brand Studio</h1>
+  <p class="sub">Choose who the settings are for, change them, and watch the preview.</p>
+
+  <div class="card hidden" id="login">
+    <label for="pw" style="margin-top:0">Admin password</label>
+    <input type="password" id="pw" autocomplete="current-password">
+    <button class="go" id="go">Sign in</button>
+    <div id="msg1" class="err"></div>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="card">
+      <div class="bar">
+        <div>
+          <label for="scope" style="margin-top:0">Settings for</label>
+          <select id="scope">
+            <option value="subaccounts">A sub-account</option>
+            <option value="users">A specific user (in every sub-account)</option>
+            <option value="demo">All demo users (6 users, same settings)</option>
+          </select>
+        </div>
+        <div>
+          <div id="locBox">
+            <label for="loc" style="margin-top:0">Sub-account</label>
+            <select id="loc"></select>
+          </div>
+          <div id="userBox" class="hidden">
+            <label for="uidSel" style="margin-top:0">User</label>
+            <select id="uidSel"></select>
+            <input type="text" id="uid" class="hidden" placeholder="Paste a user ID" style="margin-top:8px">
+          </div>
+          <div id="demoNote" class="hidden hint" style="margin-top:6px">Saving applies these settings to all 6 demo users. The form shows Arjun Shetty's current settings.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="studio hidden" id="studio">
+      <div class="card">
+        <div class="tabs">
+          <button type="button" class="tab on" id="tabMenu">Menu</button>
+          <button type="button" class="tab" id="tabTheme">Theme</button>
+        </div>
+
+        <div id="panelMenu">
+          <div class="hint">Click the eye to hide or show a menu. Type in the second box to rename it.</div>
+          <div id="menuList"></div>
+          <details>
+            <summary>Advanced</summary>
+            <label for="extraIds">Other hidden menu ids <span class="hint">separated by commas, like sb_reputation</span></label>
+            <input type="text" id="extraIds">
+            <label for="extraTitles">Other hidden menus by name <span class="hint">separated by commas, like WA QR2</span></label>
+            <input type="text" id="extraTitles">
+            <label for="hideHeadings">Hidden headings <span class="hint">separated by commas, like OTHER SETTINGS</span></label>
+            <input type="text" id="hideHeadings">
+            <label for="moveMenus">Menu order <span class="hint">one per line, like DashBoard before Conversations</span></label>
+            <textarea id="moveMenus"></textarea>
+          </details>
+        </div>
+
+        <div id="panelTheme" class="hidden">
+          <label for="logoUrl" style="margin-top:0">Logo URL <span class="hint">shown at the top of the sidebar</span></label>
+          <input type="text" id="logoUrl" placeholder="https://...">
+          <h3>Colours</h3>
+          <div class="cgrid" id="colors"></div>
+          <label class="check"><input type="checkbox" id="whiteIcons"> White menu icons</label>
+          <h3>Palette presets</h3>
+          <div class="presets" id="presets"></div>
+        </div>
+
+        <button class="go" id="save">Save changes</button>
+        <div id="msg" role="status"></div>
+      </div>
+
+      <div class="pvwrap">
+        <div class="pvhead">Live preview</div>
+        <div id="pv">
+          <div id="pvLogo"></div>
+          <div id="pvList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+var $ = function (id) { return document.getElementById(id); };
+var pw = sessionStorage.getItem("adminPw") || "";
+var CFG = null;
+var EXTRA_NAMES = {};
+var USERS = {
+  "zn75wx7Yp68SsLbZ7Ee0": "Arjun Shetty",
+  "eHSTNuzvw9Vek4jMknK1": "Kavya Nair",
+  "BYNHWalUytfAzIF53Msw": "Meera Rao",
+  "C9b8vqSkoqyL0iq3Z2nm": "Rohan Gowda",
+  "R9k3EzZkDANa4emKSizB": "Sneha Iyer",
+  "vtEMaPhf7DS8CH30gakW": "Vikas Hedge"
+};
+var DEMO_IDS = Object.keys(USERS);
+var MENUS = [
+  { id: "sb_dashboard", title: "Dashboard" },
+  { id: "sb_conversations", title: "Conversations" },
+  { id: "sb_calendars", title: "Calendars" },
+  { id: "sb_contacts", title: "Clients" },
+  { id: "sb_opportunities", title: "Sales Pipeline" },
+  { id: "sb_payments", title: "Payments" },
+  { id: "sb_AI Agents", title: "AI Agents", byTitle: true },
+  { id: "sb_email-marketing", title: "Marketing" },
+  { id: "sb_automation", title: "Automation" },
+  { id: "sb_sites", title: "Sites" },
+  { id: "sb_app-media", title: "Media Storage" },
+  { id: "sb_reporting", title: "Reporting" },
+  { id: "sb_app-marketplace", title: "App Marketplace" },
+  { id: "sb_settings", title: "Settings" }
+];
+var COLORS = [
+  ["brandColor", "Sidebar", "#1e293b"],
+  ["textColor", "Menu text", "#ffffff"],
+  ["activeTextColor", "Selected menu text", "#1e293b"],
+  ["settingsLabelColor", "Settings headings", "#1e293b"],
+  ["settingsTitleColor", "Settings titles", "#ffffff"]
+];
+var PRESETS = [
+  { n: "Navy", c: "#1e293b" },
+  { n: "Teal", c: "#0f766e" },
+  { n: "Purple", c: "#5b21b6" },
+  { n: "Green", c: "#166534" }
+];
+var EYE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+var EYEOFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/></svg>';
+var HEX = /^#[0-9a-f]{6}$/i;
+
+function api(action, body) {
+  return fetch("/api/admin?action=" + action, {
+    method: body ? "POST" : "GET",
+    headers: { "x-admin-password": pw, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined
+  }).then(function (r) {
+    return r.json().then(function (j) {
+      if (!r.ok) throw new Error(j.error || "Request failed");
+      return j;
+    });
+  });
+}
+function say(text, cls) { $("msg").textContent = text; $("msg").className = cls || ""; }
+function csv(s) { return s.split(",").map(function (x) { return x.trim(); }).filter(Boolean); }
+function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
+function dflt(k, fb) { var d = (CFG && CFG.default) || {}; return d[k] || fb; }
+
+function colorVal(k, fb) {
+  var v = $(k).value.trim();
+  return HEX.test(v) ? v : dflt(k, fb);
+}
+function setColor(k, v) {
+  $(k).value = v || "";
+  var c = COLORS.filter(function (x) { return x[0] === k; })[0];
+  $(k + "_c").value = colorVal(k, c[2]);
+}
+
+function buildColors() {
+  var box = $("colors");
+  box.innerHTML = "";
+  COLORS.forEach(function (c) {
+    var k = c[0];
+    var w = document.createElement("div");
+    w.className = "cfield";
+    var l = document.createElement("label");
+    l.textContent = c[1];
+    l.setAttribute("for", k);
+    var row = document.createElement("div");
+    row.className = "row2";
+    var t = document.createElement("input");
+    t.type = "text"; t.id = k; t.placeholder = c[2];
+    var p = document.createElement("input");
+    p.type = "color"; p.id = k + "_c"; p.value = c[2];
+    t.oninput = function () { if (HEX.test(t.value.trim())) p.value = t.value.trim(); renderPreview(); };
+    p.oninput = function () { t.value = p.value; renderPreview(); };
+    row.appendChild(t); row.appendChild(p);
+    w.appendChild(l); w.appendChild(row);
+    box.appendChild(w);
+  });
+  var pr = $("presets");
+  pr.innerHTML = "";
+  PRESETS.forEach(function (p) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "preset";
+    var sw = document.createElement("span");
+    sw.className = "sw"; sw.style.background = p.c;
+    b.appendChild(sw);
+    b.appendChild(document.createTextNode(p.n));
+    b.onclick = function () {
+      setColor("brandColor", p.c);
+      setColor("activeTextColor", p.c);
+      setColor("settingsLabelColor", p.c);
+      setColor("textColor", "#ffffff");
+      setColor("settingsTitleColor", "#ffffff");
+      renderPreview();
+    };
+    pr.appendChild(b);
+  });
+}
+
+function renderRows() {
+  var box = $("menuList");
+  box.innerHTML = "";
+  MENUS.forEach(function (m) {
+    var row = document.createElement("div");
+    row.className = "mrow" + (m.hidden ? " off" : "");
+    var eye = document.createElement("button");
+    eye.type = "button"; eye.className = "eye";
+    eye.innerHTML = m.hidden ? EYEOFF : EYE;
+    eye.title = m.hidden ? "Hidden. Click to show" : "Visible. Click to hide";
+    eye.onclick = function () { m.hidden = !m.hidden; renderRows(); renderPreview(); };
+    var t = document.createElement("span");
+    t.className = "mtitle"; t.textContent = m.title;
+    var inp = document.createElement("input");
+    inp.type = "text"; inp.placeholder = "Rename"; inp.value = m.name || "";
+    inp.oninput = function () { m.name = inp.value; renderPreview(); };
+    var b = document.createElement("span");
+    b.className = "badge"; b.textContent = "Hidden";
+    row.appendChild(eye); row.appendChild(t); row.appendChild(inp); row.appendChild(b);
+    box.appendChild(row);
+  });
+}
+
+function renderPreview() {
+  var brand = colorVal("brandColor", "#1e293b");
+  var txt = colorVal("textColor", "#ffffff");
+  var act = colorVal("activeTextColor", "#1e293b");
+  $("pv").style.background = brand;
+  var logo = $("logoUrl").value.trim() || dflt("agencyLogoUrl", "");
+  var lb = $("pvLogo");
+  lb.innerHTML = "";
+  if (logo) {
+    var im = document.createElement("img");
+    im.src = logo; im.alt = "";
+    lb.appendChild(im);
+  }
+  var list = $("pvList");
+  list.innerHTML = "";
+  var first = true;
+  MENUS.forEach(function (m) {
+    if (m.hidden) return;
+    var d = document.createElement("div");
+    d.className = "pvitem";
+    d.textContent = (m.name || "").trim() || m.title;
+    if (first) { d.style.background = "#ffffff"; d.style.color = act; first = false; }
+    else d.style.color = txt;
+    list.appendChild(d);
+  });
+}
+
+function loadSettings(s) {
+  var ids = s.hideMenus || [];
+  var titles = s.hideMenuTitles || [];
+  var names = s.menuNames || {};
+  var known = {};
+  MENUS.forEach(function (m) {
+    known[m.id] = true;
+    m.hidden = m.byTitle ? titles.indexOf(m.title) > -1 : ids.indexOf(m.id) > -1;
+    m.name = names[m.id] || "";
+  });
+  var byTitleNames = MENUS.filter(function (m) { return m.byTitle; }).map(function (m) { return m.title; });
+  $("extraIds").value = ids.filter(function (id) { return !known[id]; }).join(", ");
+  $("extraTitles").value = titles.filter(function (t) { return byTitleNames.indexOf(t) === -1; }).join(", ");
+  EXTRA_NAMES = {};
+  Object.keys(names).forEach(function (id) { if (!known[id]) EXTRA_NAMES[id] = names[id]; });
+  $("hideHeadings").value = (s.hideHeadings || []).join(", ");
+  $("moveMenus").value = (s.moveMenus || []).map(function (m) { return m.title + " before " + m.before; }).join("\n");
+  $("logoUrl").value = s.logoUrl || "";
+  COLORS.forEach(function (c) { setColor(c[0], s[c[0]]); });
+  $("whiteIcons").checked = !!s.whiteIcons;
+  renderRows();
+  renderPreview();
+}
+
+function collect() {
+  var s = {};
+  COLORS.forEach(function (c) { s[c[0]] = $(c[0]).value.trim(); });
+  s.logoUrl = $("logoUrl").value.trim();
+  s.whiteIcons = $("whiteIcons").checked;
+  s.hideMenus = uniq(MENUS.filter(function (m) { return !m.byTitle && m.hidden; }).map(function (m) { return m.id; }).concat(csv($("extraIds").value)));
+  s.hideMenuTitles = uniq(MENUS.filter(function (m) { return m.byTitle && m.hidden; }).map(function (m) { return m.title; }).concat(csv($("extraTitles").value)));
+  var names = Object.assign({}, EXTRA_NAMES);
+  MENUS.forEach(function (m) {
+    var n = (m.name || "").trim();
+    if (n && n !== m.title) names[m.id] = n;
+  });
+  s.menuNames = names;
+  s.hideHeadings = csv($("hideHeadings").value);
+  var moves = [];
+  $("moveMenus").value.split("\n").forEach(function (line) {
+    var p = line.split(/\s+before\s+/i);
+    if (p.length === 2 && p[0].trim() && p[1].trim()) moves.push({ title: p[0].trim(), before: p[1].trim() });
+  });
+  s.moveMenus = moves;
+  return s;
+}
+
+function target() {
+  var scope = $("scope").value;
+  if (scope === "demo") return { scope: "users", id: DEMO_IDS[0] };
+  if (scope === "users") {
+    var v = $("uidSel").value;
+    return { scope: "users", id: v === "other" ? $("uid").value.trim() : v };
+  }
+  return { scope: "subaccounts", id: $("loc").value };
+}
+
+function fill() {
+  var t = target();
+  say("");
+  if (!t.id) { $("studio").classList.add("hidden"); return; }
+  api("config").then(function (cfg) {
+    CFG = cfg;
+    loadSettings((cfg[t.scope] || {})[t.id] || {});
+    $("studio").classList.remove("hidden");
+  }).catch(function (e) { say(e.message, "err"); });
+}
+
+function addOpt(sel, value, text) {
+  var o = document.createElement("option");
+  o.value = value; o.textContent = text;
+  sel.appendChild(o);
+}
+
+function start() {
+  api("locations").then(function (list) {
+    $("login").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    list.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    $("loc").innerHTML = "";
+    addOpt($("loc"), "", "Choose a sub-account");
+    list.forEach(function (l) { addOpt($("loc"), l.id, l.name); });
+    $("uidSel").innerHTML = "";
+    addOpt($("uidSel"), "", "Choose a user");
+    Object.keys(USERS).forEach(function (id) { addOpt($("uidSel"), id, USERS[id]); });
+    addOpt($("uidSel"), "other", "Other user (paste ID)");
+    return api("config");
+  }).then(function (cfg) { CFG = cfg; })
+  .catch(function (e) {
+    sessionStorage.removeItem("adminPw");
+    $("app").classList.add("hidden");
+    $("login").classList.remove("hidden");
+    $("msg1").textContent = pw ? e.message : "";
+  });
+}
+
+$("go").onclick = function () {
+  pw = $("pw").value;
+  sessionStorage.setItem("adminPw", pw);
+  $("msg1").textContent = "";
+  start();
+};
+$("scope").onchange = function () {
+  var sc = $("scope").value;
+  $("locBox").classList.toggle("hidden", sc !== "subaccounts");
+  $("userBox").classList.toggle("hidden", sc !== "users");
+  $("demoNote").classList.toggle("hidden", sc !== "demo");
+  $("studio").classList.add("hidden");
+  say("");
+  if (sc === "demo") fill();
+};
+$("loc").onchange = fill;
+$("uidSel").onchange = function () {
+  $("uid").classList.toggle("hidden", $("uidSel").value !== "other");
+  fill();
+};
+$("uid").onchange = fill;
+
+function tab(which) {
+  $("panelMenu").classList.toggle("hidden", which !== "menu");
+  $("panelTheme").classList.toggle("hidden", which !== "theme");
+  $("tabMenu").classList.toggle("on", which === "menu");
+  $("tabTheme").classList.toggle("on", which === "theme");
+}
+$("tabMenu").onclick = function () { tab("menu"); };
+$("tabTheme").onclick = function () { tab("theme"); };
+$("logoUrl").oninput = renderPreview;
+["extraIds", "extraTitles"].forEach(function (id) { $(id).oninput = renderPreview; });
+
+$("save").onclick = function () {
+  var t = target();
+  if (!t.id) { say("Choose who the settings are for first.", "err"); return; }
+  var settings = collect();
+  say("Saving...");
+  var ids = $("scope").value === "demo" ? DEMO_IDS : [t.id];
+  ids.reduce(function (p, id) {
+    return p.then(function () { return api("save", { scope: t.scope, id: id, settings: settings }); });
+  }, Promise.resolve())
+    .then(function () { say("Saved" + (ids.length > 1 ? " for " + ids.length + " users" : "") + ". The sidebar updates in about a minute.", "ok"); })
+    .catch(function (e) { say(e.message, "err"); });
+};
+
+buildColors();
+start();
+</script>
+</body>
+</html>
