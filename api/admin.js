@@ -66,12 +66,6 @@ async function getLocations() {
 
 module.exports = async (req, res) => {
   try {
-    // Password check: works only if ADMIN_PASSWORD is set in Vercel
-    const need = process.env.ADMIN_PASSWORD;
-    if (need && req.headers["x-admin-password"] !== need) {
-      return res.status(401).json({ error: "Wrong password" });
-    }
-
     const action = req.query.action;
 
     if (action === "locations") {
