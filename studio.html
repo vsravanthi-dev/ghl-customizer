@@ -88,8 +88,10 @@ summary{cursor:pointer;font-weight:600}
           </div>
           <div id="userBox" class="hidden">
             <label for="uidSel" style="margin-top:0">User</label>
+            <input type="text" id="userSearch" placeholder="Search users by name" style="margin-bottom:8px">
             <select id="uidSel"></select>
             <input type="text" id="uid" class="hidden" placeholder="Paste a user ID" style="margin-top:8px">
+            <div id="userNote" class="hint" style="margin-top:6px"></div>
           </div>
           <div id="everyoneNote" class="hidden hint" style="margin-top:6px">These settings apply to every sub-account and user. A sub-account can still override them.</div>
         </div>
@@ -100,6 +102,7 @@ summary{cursor:pointer;font-weight:600}
       <div class="card">
         <div class="tabs">
           <button type="button" class="tab on" id="tabMenu">Menu</button>
+          <button type="button" class="tab" id="tabSub">Sub-menus</button>
           <button type="button" class="tab" id="tabTheme">Theme</button>
         </div>
 
@@ -117,6 +120,11 @@ summary{cursor:pointer;font-weight:600}
             <label for="moveMenus">Menu order <span class="hint">one per line, like DashBoard before Conversations</span></label>
             <textarea id="moveMenus"></textarea>
           </details>
+        </div>
+
+        <div id="panelSub" class="hidden">
+          <div class="hint">Items inside Settings and other pages. Click the eye to hide or show. If a name is not listed, add it in Menu tab, Advanced, "Other hidden menus by name" (type it exactly as in the sidebar).</div>
+          <div id="subList"></div>
         </div>
 
         <div id="panelTheme" class="hidden">
@@ -150,16 +158,9 @@ var pw = sessionStorage.getItem("adminPw") || "";
 var CFG = null;
 var EXTRA_NAMES = {};
 var EXTRA_SHOW = [];
-// Known user names. Any other user id found in config.json shows up automatically,
-// and any user can be added with "Other user (paste ID)".
-var USERS = {
-  "zn75wx7Yp68SsLbZ7Ee0": "Arjun Shetty",
-  "eHSTNuzvw9Vek4jMknK1": "Kavya Nair",
-  "BYNHWalUytfAzlF53Msw": "Meera Rao",
-  "C9b8vqSkoqyL0iq3Z2nm": "Rohan Gowda",
-  "R9k3EzZkDANa4emKSizB": "Sneha Iyer",
-  "vtEMaPhf7DS8CH30gakW": "Vikas Hedge"
-};
+// Filled live from GoHighLevel (see api/admin.js, action=users)
+var USERS = {};
+var USER_NOTE = "";
 var MENUS = [
   { id: "sb_dashboard", title: "Dashboard" },
   { id: "sb_conversations", title: "Conversations" },
@@ -176,6 +177,12 @@ var MENUS = [
   { id: "sb_app-marketplace", title: "App Marketplace" },
   { id: "sb_settings", title: "Settings" }
 ];
+var SUBS = [
+  "My Profile","Business Profile","Billing","My Staff","Opportunities & Pipelines","Companies",
+  "Calendars","Phone Numbers","Phone System","Email Services","Custom Fields","Custom Values",
+  "Tags","Integrations","Private Integrations","Domains","Labs","Audit Logs","Brand Boards","Reputation"
+].map(function (t) { return { id: "sub_" + t, title: t, byTitle: true, sub: true }; });
+var ALL = MENUS.concat(SUBS);
 var COLORS = [
   ["brandColor", "Sidebar", "#1e293b"],
   ["textColor", "Menu text", "#ffffff"],
@@ -263,10 +270,11 @@ function buildColors() {
   });
 }
 
-function renderRows() {
-  var box = $("menuList");
+function renderRows() { drawRows(MENUS, "menuList"); drawRows(SUBS, "subList"); }
+function drawRows(list, boxId) {
+  var box = $(boxId);
   box.innerHTML = "";
-  MENUS.forEach(function (m) {
+  list.forEach(function (m) {
     var row = document.createElement("div");
     row.className = "mrow" + (m.hidden ? " off" : "");
     var eye = document.createElement("button");
@@ -279,6 +287,7 @@ function renderRows() {
     var inp = document.createElement("input");
     inp.type = "text"; inp.placeholder = "Rename"; inp.value = m.name || "";
     inp.oninput = function () { m.name = inp.value; renderPreview(); };
+    if (m.sub) inp.style.visibility = "hidden";
     var b = document.createElement("span");
     b.className = "badge";
     b.textContent = m.hidden ? (m.baseHidden ? "Hidden (all)" : "Hidden") : (m.baseHidden ? "Shown here" : "");
@@ -333,7 +342,7 @@ function loadSettings(s, isDefault) {
   var baseTitles = base.hideMenuTitles || [];
   var known = {};
   var keys = {};
-  MENUS.forEach(function (m) {
+  ALL.forEach(function (m) {
     known[m.id] = true;
     var key = m.byTitle ? m.title : m.id;
     keys[key] = true;
@@ -343,7 +352,7 @@ function loadSettings(s, isDefault) {
     m.name = names[m.id] || "";
   });
   EXTRA_SHOW = show.filter(function (k) { return !keys[k]; });
-  var byTitleNames = MENUS.filter(function (m) { return m.byTitle; }).map(function (m) { return m.title; });
+  var byTitleNames = ALL.filter(function (m) { return m.byTitle; }).map(function (m) { return m.title; });
   $("extraIds").value = ids.filter(function (id) { return !known[id]; }).join(", ");
   $("extraTitles").value = titles.filter(function (t) { return byTitleNames.indexOf(t) === -1; }).join(", ");
   EXTRA_NAMES = {};
@@ -363,7 +372,7 @@ function collect() {
   s.logoUrl = $("logoUrl").value.trim();
   s.whiteIcons = $("whiteIcons").checked;
   var hideIds = [], hideTitles = [], showKeys = [];
-  MENUS.forEach(function (m) {
+  ALL.forEach(function (m) {
     if (m.hidden && !m.baseHidden) { if (m.byTitle) hideTitles.push(m.title); else hideIds.push(m.id); }
     else if (!m.hidden && m.baseHidden) showKeys.push(m.byTitle ? m.title : m.id);
   });
@@ -426,23 +435,31 @@ function addOpt(sel, value, text) {
   sel.appendChild(o);
 }
 
-// Builds the user dropdown from known names + every user id saved in config.json
+// User dropdown: real users from GHL + any user id already saved in config.json.
+// The search box filters by name. The selected user is always kept in the list.
 function buildUsers(selectId) {
   var sel = $("uidSel");
+  var q = $("userSearch").value.trim().toLowerCase();
+  var keep = selectId || (sel.value && sel.value !== "other" ? sel.value : "");
   var ids = Object.keys(USERS);
   Object.keys((CFG && CFG.users) || {}).forEach(function (id) {
     if (ids.indexOf(id) === -1) ids.push(id);
   });
+  var label = function (id) { return USERS[id] || ("User " + id); };
+  ids.sort(function (a, b) { return label(a).localeCompare(label(b)); });
   sel.innerHTML = "";
   addOpt(sel, "", "Choose a user");
   ids.forEach(function (id) {
-    addOpt(sel, id, USERS[id] || ("User " + id));
+    if (q && label(id).toLowerCase().indexOf(q) === -1 && id !== keep) return;
+    addOpt(sel, id, label(id));
   });
   addOpt(sel, "other", "Other user (paste ID)");
-  if (selectId && ids.indexOf(selectId) > -1) {
-    sel.value = selectId;
+  if (keep && ids.indexOf(keep) > -1) {
+    sel.value = keep;
     $("uid").classList.add("hidden");
   }
+  $("userNote").textContent = Object.keys(USERS).length ? "" :
+    "Could not load users from GoHighLevel" + (USER_NOTE ? " (" + USER_NOTE + ")" : "") + ". Use Other user (paste ID).";
 }
 
 function start() {
@@ -456,6 +473,11 @@ function start() {
     return api("config");
   }).then(function (cfg) {
     CFG = cfg;
+    return api("users").catch(function (e) { return { users: [], note: e.message }; });
+  }).then(function (r) {
+    USERS = {};
+    (r.users || []).forEach(function (u) { USERS[u.id] = u.name; });
+    USER_NOTE = r.note || "";
     buildUsers();
   }).catch(function (e) {
     sessionStorage.removeItem("adminPw");
@@ -485,15 +507,19 @@ $("uidSel").onchange = function () {
   $("uid").classList.toggle("hidden", $("uidSel").value !== "other");
   fill();
 };
+$("userSearch").oninput = function () { buildUsers(); };
 $("uid").onchange = fill;
 
 function tab(which) {
   $("panelMenu").classList.toggle("hidden", which !== "menu");
   $("panelTheme").classList.toggle("hidden", which !== "theme");
+  $("panelSub").classList.toggle("hidden", which !== "sub");
+  $("tabSub").classList.toggle("on", which === "sub");
   $("tabMenu").classList.toggle("on", which === "menu");
   $("tabTheme").classList.toggle("on", which === "theme");
 }
 $("tabMenu").onclick = function () { tab("menu"); };
+$("tabSub").onclick = function () { tab("sub"); };
 $("tabTheme").onclick = function () { tab("theme"); };
 $("logoUrl").oninput = renderPreview;
 ["extraIds", "extraTitles"].forEach(function (id) { $(id).oninput = renderPreview; });
