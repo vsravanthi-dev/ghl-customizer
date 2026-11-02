@@ -113,6 +113,7 @@ summary{cursor:pointer;font-weight:600}
       <div class="card">
         <div class="tabs">
           <button type="button" class="tab on" id="tabMenu">Menu</button>
+          <button type="button" class="tab" id="tabSub">Sub-menus</button>
           <button type="button" class="tab" id="tabTheme">Theme</button>
         </div>
 
@@ -126,15 +127,6 @@ summary{cursor:pointer;font-weight:600}
             </span>
           </div>
           <div id="menuList"></div>
-          <div class="sechead">
-            <h3>Settings menu</h3>
-            <span class="bulk">
-              <button type="button" class="mini" id="bSetShow">Show all</button>
-              <button type="button" class="mini" id="bSetHide">Hide all</button>
-            </span>
-          </div>
-          <div class="hint">Items inside Settings. Click the eye to hide or show.</div>
-          <div id="settingsList"></div>
           <details>
             <summary>Advanced</summary>
             <label for="extraIds">Other hidden menu ids <span class="hint">separated by commas, like sb_reputation</span></label>
@@ -150,6 +142,18 @@ summary{cursor:pointer;font-weight:600}
             <label for="hideSelectors">Hide by CSS selector <span class="hint">one per line, like a[href*='/reputation']</span></label>
             <textarea id="hideSelectors"></textarea>
           </details>
+        </div>
+
+        <div id="panelSub" class="hidden">
+          <div class="sechead">
+            <h3>Settings sub-menus</h3>
+            <span class="bulk">
+              <button type="button" class="mini" id="bSetShow">Show all</button>
+              <button type="button" class="mini" id="bSetHide">Hide all</button>
+            </span>
+          </div>
+          <div class="hint">Items inside Settings. Click the eye to hide or show. If an item is missing, type its name in Menu tab, Advanced, "Other hidden menus by name".</div>
+          <div id="settingsList"></div>
         </div>
 
         <div id="panelTheme" class="hidden">
@@ -221,7 +225,11 @@ var SETTINGS_MENUS = [
   { id: "sb_labs", title: "Labs" },
   { id: "sb_saas-billing", title: "SaaS Billing" },
   { id: "sb_conversations_providers", title: "Conversation Providers" }
-];
+].concat([
+  "Business Profile","My Profile","Billing","Users","Opportunities & Pipelines","Calendars",
+  "Email Services","Custom Fields","Custom Values","Import Data","Integrations",
+  "Private Integrations","Tags","Brand Boards"
+].map(function (t) { return { id: "sub_" + t, title: t, byTitle: true }; }));
 var COLORS = [
   ["brandColor", "Sidebar", "#1e293b"],
   ["textColor", "Menu text", "#ffffff"],
@@ -364,7 +372,16 @@ function renderPreview() {
   var list = $("pvList");
   list.innerHTML = "";
   var first = true;
-  MENUS.forEach(function (m) {
+  var onSub = !$("panelSub").classList.contains("hidden");
+  if (onSub) {
+    var h = document.createElement("div");
+    h.className = "pvitem";
+    h.style.color = txt; h.style.opacity = ".7";
+    h.textContent = "SETTINGS";
+    list.appendChild(h);
+    first = false;
+  }
+  (onSub ? SETTINGS_MENUS : MENUS).forEach(function (m) {
     if (m.hidden) return;
     var d = document.createElement("div");
     d.className = "pvitem";
@@ -395,7 +412,7 @@ function loadSettings(s, isDefault) {
     m.name = names[m.id] || "";
   });
   EXTRA_SHOW = show.filter(function (k) { return !keys[k]; });
-  var byTitleNames = MENUS.filter(function (m) { return m.byTitle; }).map(function (m) { return m.title; });
+  var byTitleNames = allMenus().filter(function (m) { return m.byTitle; }).map(function (m) { return m.title; });
   $("extraIds").value = ids.filter(function (id) { return !known[id]; }).join(", ");
   $("extraTitles").value = titles.filter(function (t) { return byTitleNames.indexOf(t) === -1; }).join(", ");
   EXTRA_NAMES = {};
@@ -581,9 +598,13 @@ $("bSetHide").onclick = function () { setAll(SETTINGS_MENUS, true); };
 function tab(which) {
   $("panelMenu").classList.toggle("hidden", which !== "menu");
   $("panelTheme").classList.toggle("hidden", which !== "theme");
+  $("panelSub").classList.toggle("hidden", which !== "sub");
   $("tabMenu").classList.toggle("on", which === "menu");
+  $("tabSub").classList.toggle("on", which === "sub");
   $("tabTheme").classList.toggle("on", which === "theme");
+  renderPreview();
 }
+$("tabSub").onclick = function () { tab("sub"); };
 $("tabMenu").onclick = function () { tab("menu"); };
 $("tabTheme").onclick = function () { tab("theme"); };
 $("logoUrl").oninput = renderPreview;
