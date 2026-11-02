@@ -98,7 +98,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
               <button type="button" class="mini" id="uNone">Clear</button>
               <span id="userCount" class="hint"></span>
             </div>
-            <input type="text" id="uid" placeholder="Other user IDs, separated by commas" style="margin-top:8px">
+            <input type="text" id="uid" placeholder="Other users: id=Name, id=Name" style="margin-top:8px">
             <div class="hint" style="margin-top:6px">The form shows the first ticked user's settings. Saving copies the form to every ticked user.</div>
           </div>
           <div id="everyoneNote" class="hidden hint" style="margin-top:6px">These settings apply to every sub-account and user. A sub-account can still override them.</div>
@@ -176,6 +176,25 @@ var $ = function (id) { return document.getElementById(id); };
 var pw = sessionStorage.getItem("adminPw") || "";
 var CFG = null;
 var USERS = {};
+// Names for known users, used when GHL cannot give them. The letters I/l and O/0 look alike in IDs, so they are matched loosely.
+var SEED_NAMES = {
+  "zn75wx7Yp68SsLbZ7Ee0": "Arjun Shetty",
+  "eHSTNuzvw9Vek4jMknK1": "Kavya Nair",
+  "BYNHWalUytfAzIF53Msw": "Meera Rao",
+  "C9b8vqSkoqyL0iq3Z2nm": "Rohan Gowda",
+  "R9k3EzZkDANa4emKSizB": "Sneha Iyer",
+  "vtEMaPhf7DS8CH30gakW": "Vikas Hedge"
+};
+function normId(s) { return String(s).replace(/I/g, "l").replace(/O/g, "0"); }
+// Name shown for a user: saved name, then GHL name, then the known names above, then the ID
+function userLabel(id) {
+  var saved = ((CFG && CFG.users && CFG.users[id]) || {}).userName;
+  if (saved) return saved;
+  if (USERS[id]) return USERS[id];
+  var n = normId(id);
+  var hit = Object.keys(SEED_NAMES).filter(function (k) { return normId(k) === n; })[0];
+  return hit ? SEED_NAMES[hit] : "User " + id;
+}
 var lastFill = "";
 var EXTRA_NAMES = {}, EXTRA_REPL = {}, EXTRA_SHOW = [], EXTRA_MOVES = [];
 var CUSTOM = [];
@@ -515,9 +534,16 @@ function collect() {
   return s;
 }
 
+// "Other users" box: IDs separated by commas, optionally with a name (id=Name)
+function otherUsers() {
+  return csv($("uid").value).map(function (x) {
+    var p = x.split("=");
+    return { id: p[0].trim(), name: p.slice(1).join("=").trim() };
+  }).filter(function (x) { return x.id; });
+}
 function selectedUsers() {
   var ids = Array.prototype.slice.call(document.querySelectorAll("#userList input:checked")).map(function (c) { return c.value; });
-  return uniq(ids.concat(csv($("uid").value)));
+  return uniq(ids.concat(otherUsers().map(function (x) { return x.id; })));
 }
 function target() {
   var scope = $("scope").value;
@@ -551,19 +577,21 @@ function addOpt(sel, value, text) {
   o.value = value; o.textContent = text;
   sel.appendChild(o);
 }
-function buildUsers() {
+function buildUsers(checked) {
+  checked = checked || [];
   var ul = $("userList");
   ul.innerHTML = "";
   var ids = Object.keys(USERS);
   Object.keys((CFG && CFG.users) || {}).forEach(function (id) { if (ids.indexOf(id) === -1) ids.push(id); });
-  ids.sort(function (a, b) { return (USERS[a] || a).localeCompare(USERS[b] || b); });
+  ids.sort(function (a, b) { return userLabel(a).localeCompare(userLabel(b)); });
   ids.forEach(function (id) {
     var l = document.createElement("label");
     l.className = "uitem";
+    l.title = id;
     var c = document.createElement("input");
-    c.type = "checkbox"; c.value = id; c.onchange = userChanged;
+    c.type = "checkbox"; c.value = id; c.checked = checked.indexOf(id) > -1; c.onchange = userChanged;
     l.appendChild(c);
-    l.appendChild(document.createTextNode(USERS[id] || ("User " + id)));
+    l.appendChild(document.createTextNode(userLabel(id)));
     ul.appendChild(l);
   });
 }
@@ -574,7 +602,7 @@ function showStatus(st) {
     : "Sub-account list is fixed. Add GHL_TOKEN and GHL_COMPANY_ID in Vercel to load new sub-accounts automatically.");
   parts.push(st.users.source === "ghl"
     ? "Users load automatically (" + st.users.count + ")."
-    : "Users could not be loaded from GHL" + (st.users.error ? " (" + st.users.error + ")" : "") + ". Paste user IDs below.");
+    : "Users could not be loaded from GHL" + (st.users.error ? " (" + st.users.error + ")" : "") + ". Add users below as id=Name.");
   if (!st.passwordSet) parts.push("No password is set, so anyone with this link can change branding.");
   $("srcNote").textContent = parts.join(" ");
 }
@@ -657,7 +685,24 @@ $("save").onclick = function () {
   var t = target();
   if (!t.ids.length) { say("Choose who the settings are for first.", "err"); return; }
   say("Saving...");
+  // names typed as id=Name are saved with the user, one by one
+  var named = t.scope === "users" ? otherUsers().filter(function (x) { return x.name; }) : [];
   api("save", { scope: t.scope, id: t.ids[0], ids: t.ids, settings: collect() })
+    .then(function () {
+      return named.reduce(function (p, x) {
+        return p.then(function () { return api("save", { scope: "users", id: x.id, ids: [x.id], settings: { userName: x.name } }); });
+      }, Promise.resolve());
+    })
+    .then(function () {
+      if (t.scope !== "users") return;
+      return api("config").then(function (cfg) {
+        CFG = cfg;
+        buildUsers(t.ids);
+        var left = otherUsers().filter(function (x) { return !(cfg.users && cfg.users[x.id]); });
+        $("uid").value = left.map(function (x) { return x.id + (x.name ? "=" + x.name : ""); }).join(", ");
+        userChanged();
+      });
+    })
     .then(function () {
       say("Saved" + (t.scope === "users" && t.ids.length > 1 ? " for " + t.ids.length + " users" : "") + ". The sidebar updates in about a minute.", "ok");
     })
