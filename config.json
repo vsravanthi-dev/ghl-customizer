@@ -52,7 +52,9 @@
     },
     "NxLoq60TfQJ0yNAm3tK3": {
       "hideMenus": [
-        "sb_payments"
+        "sb_payments",
+        "sb_app-media",
+        "sb_reporting"
       ]
     }
   },
