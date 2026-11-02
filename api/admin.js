@@ -27,9 +27,9 @@ const isEmpty = (v) =>
   (typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length);
 
 module.exports = async (req, res) => {
- 
-  
-  
+  if (req.headers["x-admin-password"] !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: "Wrong password" });
+  }
   try {
     const action = req.query.action;
 
@@ -38,6 +38,7 @@ module.exports = async (req, res) => {
         { id: "BUgWVdqLMd3RZYncJ0VV", name: "Sidvin Celeste" },
         { id: "NxLoq60TfQJ0yNAm3tK3", name: "Realtee" },
         { id: "byaCGrVxZtJJwdTAddVM", name: "Sidvin developers" },
+        { id: "Zi3agfEBlJBtgFbvGEOp", name: "Elpro360.ai" },
       ]);
     }
 
@@ -48,17 +49,23 @@ module.exports = async (req, res) => {
 
     if (action === "save" && req.method === "POST") {
       const { scope, id, settings } = req.body || {};
-      if (!["subaccounts", "users"].includes(scope) || !id || !settings) {
+      if (!["subaccounts", "users", "default"].includes(scope) || !id || !settings) {
         return res.status(400).json({ error: "Missing data" });
       }
       const { cfg, sha } = await readConfig();
-      cfg[scope] = cfg[scope] || {};
-      const cur = Object.assign({}, cfg[scope][id]);
+      let cur;
+      if (scope === "default") {
+        cur = Object.assign({}, cfg.default);
+      } else {
+        cfg[scope] = cfg[scope] || {};
+        cur = Object.assign({}, cfg[scope][id]);
+      }
       Object.keys(settings).forEach((k) => {
         if (isEmpty(settings[k])) delete cur[k];
         else cur[k] = settings[k];
       });
-      if (Object.keys(cur).length) cfg[scope][id] = cur;
+      if (scope === "default") cfg.default = cur;
+      else if (Object.keys(cur).length) cfg[scope][id] = cur;
       else delete cfg[scope][id];
       const put = await gh(FILE, {
         method: "PUT",
