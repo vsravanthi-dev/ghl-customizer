@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Brand Studio</title>
 <style>
-:root{--bg:#eef1f5;--card:#fff;--ink:#17202e;--mute:#5d6b80;--line:#d6dce5;--accent:#0f766e;--soft:#e6f4f2}
-@media (prefers-color-scheme:dark){:root{--bg:#0e1420;--card:#18202e;--ink:#eef2f7;--mute:#98a4b8;--line:#2c3648;--accent:#2dd4bf;--soft:#12332f}}
+:root{--bg:#eef1f5;--card:#fff;--ink:#17202e;--mute:#5d6b80;--line:#d6dce5;--accent:#0f766e}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1420;--card:#18202e;--ink:#eef2f7;--mute:#98a4b8;--line:#2c3648;--accent:#2dd4bf}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
 main{max-width:1000px;margin:28px auto;padding:0 16px}
@@ -16,23 +16,24 @@ h3{font-size:14px;margin:22px 0 8px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
 label{display:block;font-weight:600;margin:12px 0 5px}
 .hint{color:var(--mute);font-weight:400;font-size:13px}
-input[type=text],input[type=password],select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit}
-textarea{min-height:60px;resize:vertical}
-input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input[type=text],input[type=password],select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .hidden{display:none!important}
 .bar{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .studio{display:grid;grid-template-columns:1fr 280px;gap:16px;align-items:start}
 .tabs{display:flex;gap:8px;margin-bottom:14px}
 .tab{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 16px;font:inherit;font-weight:600;cursor:pointer}
 .tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-@media (prefers-color-scheme:dark){.tab.on{color:#06231f}}
-.mrow{display:grid;grid-template-columns:34px 1fr 1fr 96px;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
+@media (prefers-color-scheme:dark){.tab.on,.go{color:#06231f}}
+.mrow{display:grid;grid-template-columns:34px 1fr 1fr 96px 64px;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
 .mrow.off .mtitle{opacity:.45;text-decoration:line-through}
-.mtitle{font-weight:600}
+.mtitle{font-weight:600;overflow-wrap:anywhere}
 .eye{background:transparent;border:1px solid var(--line);border-radius:8px;width:34px;height:34px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .mrow.off .eye{color:var(--mute);background:var(--bg)}
 .badge{font-size:12px;color:var(--mute);background:var(--bg);border-radius:6px;padding:0 6px;text-align:center}
 .badge:empty{visibility:hidden}
+.arrows{display:flex;gap:4px}
+.arrows .mini{padding:2px 8px}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
 .cfield .row2{display:flex;gap:8px}
 .cfield input[type=color]{width:44px;height:36px;padding:2px;border:1px solid var(--line);border-radius:7px;background:var(--bg);cursor:pointer}
@@ -40,10 +41,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .preset{display:flex;gap:8px;align-items:center;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 12px;font:inherit;cursor:pointer}
 .sw{width:18px;height:18px;border-radius:5px;display:inline-block}
 .check{display:flex;gap:8px;align-items:center;font-weight:600;margin-top:14px}
-details{margin-top:18px}
-summary{cursor:pointer;font-weight:600}
 .go{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 22px;font:inherit;font-weight:600;cursor:pointer;margin-top:18px}
-@media (prefers-color-scheme:dark){.go{color:#06231f}}
 #msg,#msg1{margin-top:12px;font-weight:600;min-height:1.4em}
 .err{color:#c0392b}.ok{color:var(--accent)}
 .pvwrap{position:sticky;top:12px}
@@ -52,16 +50,16 @@ summary{cursor:pointer;font-weight:600}
 #pvLogo{margin:0 6px 12px;min-height:34px}
 #pvLogo img{max-height:42px;max-width:100%;background:#fff;border-radius:6px;padding:3px 5px}
 .pvitem{padding:8px 10px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:2px}
-@media(max-width:760px){.studio{grid-template-columns:1fr}.pvwrap{position:static}.bar{grid-template-columns:1fr}.mrow{grid-template-columns:34px 1fr 1fr}.badge{display:none}.cgrid{grid-template-columns:1fr}}
-.mrow.norename{grid-template-columns:34px 1fr 96px}
 .sechead{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
 .sechead h3{margin:0}
 .bulk{display:flex;gap:6px}
 .mini{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:4px 10px;font:inherit;font-size:13px;cursor:pointer}
+.mini:hover{border-color:var(--accent)}
+.addrow{display:flex;gap:8px;margin-top:8px}
 .ulist{max-height:190px;overflow:auto;border:1px solid var(--line);border-radius:7px;background:var(--bg);padding:2px 10px}
 .uitem{display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0;cursor:pointer}
 .ubtns{display:flex;gap:6px;margin-top:6px;align-items:center}
-@media(max-width:760px){.mrow.norename{grid-template-columns:34px 1fr}}
+@media(max-width:760px){.studio{grid-template-columns:1fr}.pvwrap{position:static}.bar{grid-template-columns:1fr}.mrow{grid-template-columns:34px 1fr 64px}.mrow .rn,.badge{display:none}.cgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -118,7 +116,7 @@ summary{cursor:pointer;font-weight:600}
         </div>
 
         <div id="panelMenu">
-          <div class="hint">Click the eye to hide or show a menu. Type in the second box to rename it.</div>
+          <div class="hint">Eye = hide or show. Second box = rename. Arrows = change the order. Headings with nothing under them hide automatically.</div>
           <div class="sechead">
             <h3>Main menu</h3>
             <span class="bulk">
@@ -127,21 +125,13 @@ summary{cursor:pointer;font-weight:600}
             </span>
           </div>
           <div id="menuList"></div>
-          <details>
-            <summary>Advanced</summary>
-            <label for="extraIds">Other hidden menu ids <span class="hint">separated by commas, like sb_reputation</span></label>
-            <input type="text" id="extraIds">
-            <label for="extraTitles">Other hidden menus by name <span class="hint">separated by commas, like WA QR2</span></label>
-            <input type="text" id="extraTitles">
-            <label for="hideHeadings">Hidden headings <span class="hint">separated by commas, like OTHER SETTINGS</span></label>
-            <input type="text" id="hideHeadings">
-            <label for="moveMenus">Menu order <span class="hint">one per line, like DashBoard before Conversations</span></label>
-            <textarea id="moveMenus"></textarea>
-            <label for="textReplace">Replace text <span class="hint">one per line, like Opportunities =&gt; Sales Pipeline</span></label>
-            <textarea id="textReplace"></textarea>
-            <label for="hideSelectors">Hide by CSS selector <span class="hint">one per line, like a[href*='/reputation']</span></label>
-            <textarea id="hideSelectors"></textarea>
-          </details>
+          <div class="sechead"><h3>Other menus</h3></div>
+          <div class="hint">Anything not listed above: type its name as shown in the sidebar, or its id (like sb_reputation), or a CSS selector.</div>
+          <div class="addrow">
+            <input type="text" id="customIn" placeholder="e.g. WA QR2">
+            <button type="button" class="mini" id="customAdd">Add</button>
+          </div>
+          <div id="customList"></div>
         </div>
 
         <div id="panelSub" class="hidden">
@@ -152,7 +142,7 @@ summary{cursor:pointer;font-weight:600}
               <button type="button" class="mini" id="bSetHide">Hide all</button>
             </span>
           </div>
-          <div class="hint">Items inside Settings. Click the eye to hide or show. If an item is missing, type its name in Menu tab, Advanced, "Other hidden menus by name".</div>
+          <div class="hint">Items inside Settings. Eye = hide or show, second box = rename. If an item is missing, add it under Menu, Other menus.</div>
           <div id="settingsList"></div>
         </div>
 
@@ -185,17 +175,11 @@ summary{cursor:pointer;font-weight:600}
 var $ = function (id) { return document.getElementById(id); };
 var pw = sessionStorage.getItem("adminPw") || "";
 var CFG = null;
-var EXTRA_NAMES = {};
-var EXTRA_SHOW = [];
-var USERS = {
-  "zn75wx7Yp68SsLbZ7Ee0": "Arjun Shetty",
-  "eHSTNuzvw9Vek4jMknK1": "Kavya Nair",
-  "BYNHWalUytfAzIF53Msw": "Meera Rao",
-  "C9b8vqSkoqyL0iq3Z2nm": "Rohan Gowda",
-  "R9k3EzZkDANa4emKSizB": "Sneha Iyer",
-  "vtEMaPhf7DS8CH30gakW": "Vikas Hedge"
-};
+var USERS = {};
 var lastFill = "";
+var EXTRA_NAMES = {}, EXTRA_REPL = {}, EXTRA_SHOW = [], EXTRA_MOVES = [];
+var CUSTOM = [];
+var ORDER_DIRTY = false;
 var MENUS = [
   { id: "sb_dashboard", title: "Dashboard" },
   { id: "sb_conversations", title: "Conversations" },
@@ -215,7 +199,8 @@ var MENUS = [
   { id: "sb_whatsapp", title: "WhatsApp" },
   { id: "sb_settings", title: "Settings" }
 ];
-// Items inside Settings. Titles are guessed from the ids, so check them against GHL.
+var DEFAULT_ORDER = MENUS.map(function (m) { return m.id; });
+// Items inside Settings. Titles are guessed, so check them against GHL.
 var SETTINGS_MENUS = [
   { id: "sb_manage-scoring", title: "Manage Scoring" },
   { id: "sb_manage-preferences", title: "Manage Preferences" },
@@ -238,10 +223,8 @@ var COLORS = [
   ["settingsTitleColor", "Settings titles", "#ffffff"]
 ];
 var PRESETS = [
-  { n: "Navy", c: "#1e293b" },
-  { n: "Teal", c: "#0f766e" },
-  { n: "Purple", c: "#5b21b6" },
-  { n: "Green", c: "#166534" }
+  { n: "Navy", c: "#1e293b" }, { n: "Teal", c: "#0f766e" },
+  { n: "Purple", c: "#5b21b6" }, { n: "Green", c: "#166534" }
 ];
 var EYE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 var EYEOFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/></svg>';
@@ -259,16 +242,13 @@ function api(action, body) {
     });
   });
 }
-function say(text, cls) { $("msg").textContent = text; $("msg").className = cls || ""; }
+function say(t, c) { $("msg").textContent = t; $("msg").className = c || ""; }
 function csv(s) { return s.split(",").map(function (x) { return x.trim(); }).filter(Boolean); }
 function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
 function allMenus() { return MENUS.concat(SETTINGS_MENUS); }
+function keyOf(m) { return m.byTitle ? m.title : m.id; }
 function dflt(k, fb) { var d = (CFG && CFG.default) || {}; return d[k] || fb; }
-
-function colorVal(k, fb) {
-  var v = $(k).value.trim();
-  return HEX.test(v) ? v : dflt(k, fb);
-}
+function colorVal(k, fb) { var v = $(k).value.trim(); return HEX.test(v) ? v : dflt(k, fb); }
 function setColor(k, v) {
   $(k).value = v || "";
   var c = COLORS.filter(function (x) { return x[0] === k; })[0];
@@ -283,8 +263,7 @@ function buildColors() {
     var w = document.createElement("div");
     w.className = "cfield";
     var l = document.createElement("label");
-    l.textContent = c[1];
-    l.setAttribute("for", k);
+    l.textContent = c[1]; l.setAttribute("for", k);
     var row = document.createElement("div");
     row.className = "row2";
     var t = document.createElement("input");
@@ -307,10 +286,8 @@ function buildColors() {
     b.appendChild(sw);
     b.appendChild(document.createTextNode(p.n));
     b.onclick = function () {
-      setColor("brandColor", p.c);
-      setColor("activeTextColor", p.c);
-      setColor("settingsLabelColor", p.c);
-      setColor("textColor", "#ffffff");
+      setColor("brandColor", p.c); setColor("activeTextColor", p.c);
+      setColor("settingsLabelColor", p.c); setColor("textColor", "#ffffff");
       setColor("settingsTitleColor", "#ffffff");
       renderPreview();
     };
@@ -318,42 +295,94 @@ function buildColors() {
   });
 }
 
-function renderList(boxId, list, canRename) {
+function badgeText(m) {
+  return m.hidden ? (m.baseHidden ? "Hidden (all)" : "Hidden") : (m.baseHidden ? "Shown here" : "");
+}
+function eyeBtn(m) {
+  var eye = document.createElement("button");
+  eye.type = "button"; eye.className = "eye";
+  eye.innerHTML = m.hidden ? EYEOFF : EYE;
+  eye.title = m.hidden ? "Hidden. Click to show" : "Visible. Click to hide";
+  eye.onclick = function () { m.hidden = !m.hidden; renderRows(); renderPreview(); };
+  return eye;
+}
+function renderList(boxId, list, arrows) {
   var box = $(boxId);
   box.innerHTML = "";
-  list.forEach(function (m) {
+  list.forEach(function (m, i) {
     var row = document.createElement("div");
-    row.className = "mrow" + (m.hidden ? " off" : "") + (canRename ? "" : " norename");
-    var eye = document.createElement("button");
-    eye.type = "button"; eye.className = "eye";
-    eye.innerHTML = m.hidden ? EYEOFF : EYE;
-    eye.title = m.hidden ? "Hidden. Click to show" : "Visible. Click to hide";
-    eye.onclick = function () { m.hidden = !m.hidden; renderRows(); renderPreview(); };
+    row.className = "mrow" + (m.hidden ? " off" : "");
+    row.appendChild(eyeBtn(m));
     var t = document.createElement("span");
     t.className = "mtitle"; t.textContent = m.title;
-    row.appendChild(eye); row.appendChild(t);
-    if (canRename) {
-      var inp = document.createElement("input");
-      inp.type = "text"; inp.placeholder = "Rename"; inp.value = m.name || "";
-      if (m.byTitle) { inp.disabled = true; inp.placeholder = "Rename not available"; }
-      inp.oninput = function () { m.name = inp.value; renderPreview(); };
-      row.appendChild(inp);
-    }
+    row.appendChild(t);
+    var inp = document.createElement("input");
+    inp.type = "text"; inp.className = "rn"; inp.placeholder = "Rename"; inp.value = m.name || "";
+    inp.oninput = function () { m.name = inp.value; renderPreview(); };
+    row.appendChild(inp);
     var b = document.createElement("span");
-    b.className = "badge";
-    b.textContent = m.hidden ? (m.baseHidden ? "Hidden (all)" : "Hidden") : (m.baseHidden ? "Shown here" : "");
+    b.className = "badge"; b.textContent = badgeText(m);
     row.appendChild(b);
+    var ar = document.createElement("span");
+    ar.className = "arrows";
+    if (arrows) {
+      [["\u25B2", -1], ["\u25BC", 1]].forEach(function (x) {
+        var bt = document.createElement("button");
+        bt.type = "button"; bt.className = "mini"; bt.textContent = x[0];
+        bt.title = x[1] < 0 ? "Move up" : "Move down";
+        bt.onclick = function () {
+          var j = i + x[1];
+          if (j < 0 || j >= list.length) return;
+          var tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+          ORDER_DIRTY = true;
+          renderRows(); renderPreview();
+        };
+        ar.appendChild(bt);
+      });
+    }
+    row.appendChild(ar);
+    box.appendChild(row);
+  });
+}
+function renderCustom() {
+  var box = $("customList");
+  box.innerHTML = "";
+  CUSTOM.forEach(function (c) {
+    var row = document.createElement("div");
+    row.className = "mrow" + (c.hidden ? " off" : "");
+    row.appendChild(eyeBtn(c));
+    var t = document.createElement("span");
+    t.className = "mtitle"; t.textContent = c.value;
+    row.appendChild(t);
+    var k = document.createElement("span");
+    k.className = "hint rn";
+    k.textContent = c.kind === "id" ? "menu id" : c.kind === "sel" ? "CSS selector" : "by name";
+    row.appendChild(k);
+    var b = document.createElement("span");
+    b.className = "badge"; b.textContent = badgeText(c);
+    row.appendChild(b);
+    row.appendChild(document.createElement("span"));
     box.appendChild(row);
   });
 }
 function renderRows() {
   renderList("menuList", MENUS, true);
   renderList("settingsList", SETTINGS_MENUS, false);
+  renderCustom();
 }
 function setAll(list, hide) {
   list.forEach(function (m) { m.hidden = hide; });
+  renderRows(); renderPreview();
+}
+function addCustom() {
+  var v = $("customIn").value.trim();
+  if (!v) return;
+  var kind = /^sb_/.test(v) ? "id" : /[\[\].#>:*]/.test(v) ? "sel" : "title";
+  var dup = CUSTOM.some(function (c) { return c.kind === kind && c.value === v; }) ||
+    allMenus().some(function (m) { return keyOf(m) === v; });
+  if (!dup) CUSTOM.push({ kind: kind, value: v, hidden: true, baseHidden: false });
+  $("customIn").value = "";
   renderRows();
-  renderPreview();
 }
 
 function renderPreview() {
@@ -375,8 +404,7 @@ function renderPreview() {
   var onSub = !$("panelSub").classList.contains("hidden");
   if (onSub) {
     var h = document.createElement("div");
-    h.className = "pvitem";
-    h.style.color = txt; h.style.opacity = ".7";
+    h.className = "pvitem"; h.style.color = txt; h.style.opacity = ".7";
     h.textContent = "SETTINGS";
     list.appendChild(h);
     first = false;
@@ -396,32 +424,40 @@ function loadSettings(s, isDefault) {
   var ids = s.hideMenus || [];
   var titles = s.hideMenuTitles || [];
   var names = s.menuNames || {};
+  var repl = s.textReplace || {};
   var show = s.showMenus || [];
   var base = isDefault ? {} : ((CFG && CFG.default) || {});
   var baseIds = base.hideMenus || [];
   var baseTitles = base.hideMenuTitles || [];
-  var known = {};
-  var keys = {};
+  var known = {}, keys = {}, titleKeys = {};
+  MENUS.sort(function (a, b) { return DEFAULT_ORDER.indexOf(a.id) - DEFAULT_ORDER.indexOf(b.id); });
+  ORDER_DIRTY = false;
+  EXTRA_MOVES = s.moveMenus || [];
   allMenus().forEach(function (m) {
     known[m.id] = true;
-    var key = m.byTitle ? m.title : m.id;
+    var key = keyOf(m);
     keys[key] = true;
+    if (m.byTitle) titleKeys[m.title] = true;
     var own = m.byTitle ? titles.indexOf(m.title) > -1 : ids.indexOf(m.id) > -1;
     m.baseHidden = m.byTitle ? baseTitles.indexOf(m.title) > -1 : baseIds.indexOf(m.id) > -1;
     m.hidden = (own || m.baseHidden) && show.indexOf(key) === -1;
-    m.name = names[m.id] || "";
+    m.name = m.byTitle ? (repl[m.title] || "") : (names[m.id] || "");
   });
   EXTRA_SHOW = show.filter(function (k) { return !keys[k]; });
-  var byTitleNames = allMenus().filter(function (m) { return m.byTitle; }).map(function (m) { return m.title; });
-  $("extraIds").value = ids.filter(function (id) { return !known[id]; }).join(", ");
-  $("extraTitles").value = titles.filter(function (t) { return byTitleNames.indexOf(t) === -1; }).join(", ");
   EXTRA_NAMES = {};
   Object.keys(names).forEach(function (id) { if (!known[id]) EXTRA_NAMES[id] = names[id]; });
-  $("hideHeadings").value = (s.hideHeadings || []).join(", ");
-  var tr = s.textReplace || {};
-  $("textReplace").value = Object.keys(tr).map(function (k) { return k + " => " + tr[k]; }).join("\n");
-  $("hideSelectors").value = (s.hideSelectors || []).join("\n");
-  $("moveMenus").value = (s.moveMenus || []).map(function (m) { return m.title + " before " + m.before; }).join("\n");
+  EXTRA_REPL = {};
+  Object.keys(repl).forEach(function (k) { if (!titleKeys[k]) EXTRA_REPL[k] = repl[k]; });
+  CUSTOM = [];
+  ids.filter(function (id) { return !known[id]; }).forEach(function (id) {
+    CUSTOM.push({ kind: "id", value: id, hidden: true, baseHidden: false });
+  });
+  titles.filter(function (t) { return !titleKeys[t]; }).forEach(function (t) {
+    CUSTOM.push({ kind: "title", value: t, hidden: true, baseHidden: false });
+  });
+  (s.hideSelectors || []).forEach(function (x) {
+    CUSTOM.push({ kind: "sel", value: x, hidden: true, baseHidden: false });
+  });
   $("logoUrl").value = s.logoUrl || "";
   COLORS.forEach(function (c) { setColor(c[0], s[c[0]]); });
   $("whiteIcons").checked = !!s.whiteIcons;
@@ -429,41 +465,43 @@ function loadSettings(s, isDefault) {
   renderPreview();
 }
 
+function buildMoves() {
+  if (!ORDER_DIRTY) return EXTRA_MOVES;
+  var vis = MENUS.filter(function (m) { return !m.hidden; });
+  var moves = [];
+  // last-to-first, so each item lands right before the one after it
+  for (var i = vis.length - 2; i >= 0; i--) moves.push({ title: keyOf(vis[i]), before: keyOf(vis[i + 1]) });
+  return moves;
+}
+
 function collect() {
   var s = {};
   COLORS.forEach(function (c) { s[c[0]] = $(c[0]).value.trim(); });
   s.logoUrl = $("logoUrl").value.trim();
   s.whiteIcons = $("whiteIcons").checked;
-  var hideIds = [], hideTitles = [], showKeys = [];
-  allMenus().forEach(function (m) {
-    if (m.hidden && !m.baseHidden) { if (m.byTitle) hideTitles.push(m.title); else hideIds.push(m.id); }
-    else if (!m.hidden && m.baseHidden) showKeys.push(m.byTitle ? m.title : m.id);
+  var hideIds = [], hideTitles = [], showKeys = [], sels = [];
+  allMenus().concat(CUSTOM).forEach(function (m) {
+    var kind = m.kind || (m.byTitle ? "title" : "id");
+    var val = m.kind ? m.value : keyOf(m);
+    if (kind === "sel") { if (m.hidden) sels.push(val); return; }
+    if (m.hidden && !m.baseHidden) (kind === "title" ? hideTitles : hideIds).push(val);
+    else if (!m.hidden && m.baseHidden) showKeys.push(val);
   });
-  s.hideMenus = uniq(hideIds.concat(csv($("extraIds").value)));
-  s.hideMenuTitles = uniq(hideTitles.concat(csv($("extraTitles").value)));
+  s.hideMenus = uniq(hideIds);
+  s.hideMenuTitles = uniq(hideTitles);
   s.showMenus = uniq(showKeys.concat(EXTRA_SHOW));
+  s.hideSelectors = uniq(sels);
   var names = Object.assign({}, EXTRA_NAMES);
-  MENUS.forEach(function (m) {
+  var tr = Object.assign({}, EXTRA_REPL);
+  allMenus().forEach(function (m) {
     var n = (m.name || "").trim();
-    if (n && n !== m.title) names[m.id] = n;
+    if (!n || n === m.title) return;
+    if (m.byTitle) tr[m.title] = n; else names[m.id] = n;
   });
   s.menuNames = names;
-  s.hideHeadings = csv($("hideHeadings").value);
-  var moves = [];
-  $("moveMenus").value.split("\n").forEach(function (line) {
-    var p = line.split(/\s+before\s+/i);
-    if (p.length === 2 && p[0].trim() && p[1].trim()) moves.push({ title: p[0].trim(), before: p[1].trim() });
-  });
-  s.moveMenus = moves;
-  var tr = {};
-  $("textReplace").value.split("\n").forEach(function (line) {
-    var i = line.indexOf("=>");
-    if (i < 0) return;
-    var a = line.slice(0, i).trim(), b = line.slice(i + 2).trim();
-    if (a && b) tr[a] = b;
-  });
   s.textReplace = tr;
-  s.hideSelectors = $("hideSelectors").value.split("\n").map(function (x) { return x.trim(); }).filter(Boolean);
+  s.hideHeadings = [];
+  s.moveMenus = buildMoves();
   return s;
 }
 
@@ -471,7 +509,6 @@ function selectedUsers() {
   var ids = Array.prototype.slice.call(document.querySelectorAll("#userList input:checked")).map(function (c) { return c.value; });
   return uniq(ids.concat(csv($("uid").value)));
 }
-
 function target() {
   var scope = $("scope").value;
   if (scope === "everyone") return { scope: "default", id: "all", ids: ["all"] };
@@ -482,7 +519,6 @@ function target() {
   var l = $("loc").value;
   return { scope: "subaccounts", id: l, ids: l ? [l] : [] };
 }
-
 function fill() {
   var t = target();
   lastFill = t.id;
@@ -495,34 +531,32 @@ function fill() {
     $("studio").classList.remove("hidden");
   }).catch(function (e) { say(e.message, "err"); });
 }
-
 function userChanged() {
   var ids = selectedUsers();
   $("userCount").textContent = ids.length ? ids.length + " selected" : "";
   if ((ids[0] || "") !== lastFill) fill();
 }
-
 function addOpt(sel, value, text) {
   var o = document.createElement("option");
   o.value = value; o.textContent = text;
   sel.appendChild(o);
 }
-
 function buildUsers() {
   var ul = $("userList");
   ul.innerHTML = "";
-  Object.keys(USERS).forEach(function (id) {
+  var ids = Object.keys(USERS);
+  Object.keys((CFG && CFG.users) || {}).forEach(function (id) { if (ids.indexOf(id) === -1) ids.push(id); });
+  ids.sort(function (a, b) { return (USERS[a] || a).localeCompare(USERS[b] || b); });
+  ids.forEach(function (id) {
     var l = document.createElement("label");
     l.className = "uitem";
     var c = document.createElement("input");
-    c.type = "checkbox"; c.value = id;
-    c.onchange = userChanged;
+    c.type = "checkbox"; c.value = id; c.onchange = userChanged;
     l.appendChild(c);
-    l.appendChild(document.createTextNode(USERS[id]));
+    l.appendChild(document.createTextNode(USERS[id] || ("User " + id)));
     ul.appendChild(l);
   });
 }
-
 function showStatus(st) {
   var parts = [];
   parts.push(st.locations.source === "ghl"
@@ -530,7 +564,7 @@ function showStatus(st) {
     : "Sub-account list is fixed. Add GHL_TOKEN and GHL_COMPANY_ID in Vercel to load new sub-accounts automatically.");
   parts.push(st.users.source === "ghl"
     ? "Users load automatically (" + st.users.count + ")."
-    : "User list is fixed.");
+    : "Users could not be loaded from GHL" + (st.users.error ? " (" + st.users.error + ")" : "") + ". Paste user IDs below.");
   if (!st.passwordSet) parts.push("No password is set, so anyone with this link can change branding.");
   $("srcNote").textContent = parts.join(" ");
 }
@@ -544,17 +578,15 @@ function start() {
     addOpt($("loc"), "", "Choose a sub-account");
     list.forEach(function (l) { addOpt($("loc"), l.id, l.name); });
     return api("users").then(function (u) {
-      if (Array.isArray(u) && u.length) {
-        USERS = {};
-        u.forEach(function (x) { USERS[x.id] = x.name; });
-      }
+      USERS = {};
+      if (Array.isArray(u)) u.forEach(function (x) { USERS[x.id] = x.name; });
     }).catch(function () {});
-  }).then(function () {
+  }).then(function () { return api("config"); })
+  .then(function (cfg) {
+    CFG = cfg;
     buildUsers();
     return api("status").then(showStatus).catch(function () {});
-  }).then(function () { return api("config"); })
-  .then(function (cfg) { CFG = cfg; })
-  .catch(function (e) {
+  }).catch(function (e) {
     sessionStorage.removeItem("adminPw");
     $("app").classList.add("hidden");
     $("login").classList.remove("hidden");
@@ -594,6 +626,8 @@ $("bMainShow").onclick = function () { setAll(MENUS, false); };
 $("bMainHide").onclick = function () { setAll(MENUS, true); };
 $("bSetShow").onclick = function () { setAll(SETTINGS_MENUS, false); };
 $("bSetHide").onclick = function () { setAll(SETTINGS_MENUS, true); };
+$("customAdd").onclick = addCustom;
+$("customIn").onkeydown = function (e) { if (e.key === "Enter") { e.preventDefault(); addCustom(); } };
 
 function tab(which) {
   $("panelMenu").classList.toggle("hidden", which !== "menu");
@@ -604,19 +638,19 @@ function tab(which) {
   $("tabTheme").classList.toggle("on", which === "theme");
   renderPreview();
 }
-$("tabSub").onclick = function () { tab("sub"); };
 $("tabMenu").onclick = function () { tab("menu"); };
+$("tabSub").onclick = function () { tab("sub"); };
 $("tabTheme").onclick = function () { tab("theme"); };
 $("logoUrl").oninput = renderPreview;
-["extraIds", "extraTitles"].forEach(function (id) { $(id).oninput = renderPreview; });
 
 $("save").onclick = function () {
   var t = target();
   if (!t.ids.length) { say("Choose who the settings are for first.", "err"); return; }
-  var settings = collect();
   say("Saving...");
-  api("save", { scope: t.scope, id: t.ids[0], ids: t.ids, settings: settings })
-    .then(function () { say("Saved" + (t.scope === "users" && t.ids.length > 1 ? " for " + t.ids.length + " users" : "") + ". The sidebar updates in about a minute.", "ok"); })
+  api("save", { scope: t.scope, id: t.ids[0], ids: t.ids, settings: collect() })
+    .then(function () {
+      say("Saved" + (t.scope === "users" && t.ids.length > 1 ? " for " + t.ids.length + " users" : "") + ". The sidebar updates in about a minute.", "ok");
+    })
     .catch(function (e) { say(e.message, "err"); });
 };
 
