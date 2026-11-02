@@ -6,143 +6,44 @@
     "settingsLabelColor": "#1e293b",
     "settingsTitleColor": "#ffffff",
     "whiteIcons": true,
-    "menuNames": {
-      "sb_contacts": "Clients",
-      "sb_opportunities": "Sales Pipeline"
-    },
     "hideMenus": [],
-    "moveMenus": [
-      {
-        "title": "DashBoard",
-        "before": "Conversations"
-      }
-    ],
-    "textReplace": {
-      "Opportunities": "Sales Pipeline"
-    },
     "agencyLogoUrl": "https://msgsndr-private.storage.googleapis.com/companyPhotos/01M65KBW7F7V2DXGZ021HTRS99_4VWDYY_0cfc89f1-2893-4b15-b943-d833807729f7.png"
   },
   "subaccounts": {
     "BUgWVdqLMd3RZYncJ0VV": {
       "logoUrl": "https://ghl-customizer-peach.vercel.app/sidvin-celeste-logo-700x360.png",
+      "menuNames": {
+        "sb_contacts": "Clients",
+        "sb_opportunities": "Sales Pipeline"
+      },
+      "moveMenus": [
+        { "title": "DashBoard", "before": "Conversations" }
+      ],
+      "textReplace": {
+        "Opportunities": "Sales Pipeline"
+      },
       "hideMenus": [
-        "sb_dashboard",
-        "sb_marketing",
-        "sb_email-marketing",
-        "sb_reporting",
-        "sb_app-marketplace",
-        "sb_payments",
-        "sb_reputation",
-        "sb_whatsapp",
-        "sb_manage-scoring",
-        "sb_manage-preferences",
-        "sb_domains-urlRedirects",
-        "sb_external-tracking",
-        "sb_objects",
-        "sb_labs",
-        "sb_saas-billing",
+        "sb_dashboard", "sb_marketing", "sb_email-marketing", "sb_reporting",
+        "sb_app-marketplace", "sb_payments", "sb_reputation", "sb_whatsapp",
+        "sb_manage-scoring", "sb_manage-preferences", "sb_domains-urlRedirects",
+        "sb_external-tracking", "sb_objects", "sb_labs", "sb_saas-billing",
         "sb_conversations_providers"
       ],
       "hideSelectors": [
-        "a[href*='/reputation']",
-        "a[href*='/marketing']",
-        "a[href*='/reporting']",
-        "a[href*='marketplace']"
+        "a[href*='/reputation']", "a[href*='/marketing']",
+        "a[href*='/reporting']", "a[href*='marketplace']"
       ]
     },
     "NxLoq60TfQJ0yNAm3tK3": {
-      "hideMenus": [
-        "sb_payments",
-        "sb_app-media",
-        "sb_reporting",
-        "sb_app-marketplace"
-      ]
+      "hideMenus": ["sb_payments", "sb_app-media", "sb_reporting", "sb_app-marketplace"]
     }
   },
   "users": {
-    "zn75wx7Yp68SsLbZ7Ee0": {
-      "brandColor": "#0f766e",
-      "activeTextColor": "#0f766e",
-      "settingsLabelColor": "#0f766e",
-      "hideMenus": [
-        "sb_sites"
-      ],
-      "hideMenuTitles": [
-        "WA QR2"
-      ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
-      ]
-    },
-    "eHSTNuzvw9Vek4jMknK1": {
-      "brandColor": "#0f766e",
-      "activeTextColor": "#0f766e",
-      "settingsLabelColor": "#0f766e",
-      "hideMenus": [
-        "sb_sites"
-      ],
-      "hideMenuTitles": [
-        "WA QR2"
-      ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
-      ]
-    },
-    "BYNHWalUytfAzIF53Msw": {
-      "brandColor": "#0f766e",
-      "activeTextColor": "#0f766e",
-      "settingsLabelColor": "#0f766e",
-      "hideMenus": [
-        "sb_sites"
-      ],
-      "hideMenuTitles": [
-        "WA QR2"
-      ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
-      ]
-    },
-    "C9b8vqSkoqyL0iq3Z2nm": {
-      "brandColor": "#0f766e",
-      "activeTextColor": "#0f766e",
-      "settingsLabelColor": "#0f766e",
-      "hideMenus": [
-        "sb_sites"
-      ],
-      "hideMenuTitles": [
-        "WA QR2"
-      ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
-      ]
-    },
-    "R9k3EzZkDANa4emKSizB": {
-      "brandColor": "#0f766e",
-      "activeTextColor": "#0f766e",
-      "settingsLabelColor": "#0f766e",
-      "hideMenus": [
-        "sb_sites"
-      ],
-      "hideMenuTitles": [
-        "WA QR2"
-      ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
-      ]
-    },
-    "vtEMaPhf7DS8CH30gakW": {
-      "brandColor": "#0f766e",
-      "activeTextColor": "#0f766e",
-      "settingsLabelColor": "#0f766e",
-      "hideMenus": [
-        "sb_sites"
-      ],
-      "hideMenuTitles": [
-        "WA QR2"
-      ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
-      ]
-    }
+    "zn75wx7Yp68SsLbZ7Ee0": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "settingsLabelColor": "#0f766e", "hideMenus": ["sb_sites"], "hideMenuTitles": ["WA QR2"], "hideHeadings": ["OTHER SETTINGS"] },
+    "eHSTNuzvw9Vek4jMknK1": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "settingsLabelColor": "#0f766e", "hideMenus": ["sb_sites"], "hideMenuTitles": ["WA QR2"], "hideHeadings": ["OTHER SETTINGS"] },
+    "BYNHWalUytfAzIF53Msw": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "settingsLabelColor": "#0f766e", "hideMenus": ["sb_sites"], "hideMenuTitles": ["WA QR2"], "hideHeadings": ["OTHER SETTINGS"] },
+    "C9b8vqSkoqyL0iq3Z2nm": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "settingsLabelColor": "#0f766e", "hideMenus": ["sb_sites"], "hideMenuTitles": ["WA QR2"], "hideHeadings": ["OTHER SETTINGS"] },
+    "R9k3EzZkDANa4emKSizB": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "settingsLabelColor": "#0f766e", "hideMenus": ["sb_sites"], "hideMenuTitles": ["WA QR2"], "hideHeadings": ["OTHER SETTINGS"] },
+    "vtEMaPhf7DS8CH30gakW": { "brandColor": "#0f766e", "activeTextColor": "#0f766e", "settingsLabelColor": "#0f766e", "hideMenus": ["sb_sites"], "hideMenuTitles": ["WA QR2"], "hideHeadings": ["OTHER SETTINGS"] }
   }
 }
