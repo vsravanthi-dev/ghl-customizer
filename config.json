@@ -52,6 +52,20 @@
         "a[href*='/marketing']",
         "a[href*='/reporting']",
         "a[href*='marketplace']"
+      ],
+      "hideMenuTitles": [
+        "Billing",
+        "Email Services",
+        "WhatsApp",
+        "Objects",
+        "Import Data",
+        "Manage Scoring",
+        "Domains & URL Redirects",
+        "External Tracking",
+        "Conversation Providers",
+        "Tags",
+        "Labs",
+        "Brand Boards"
       ]
     },
     "NxLoq60TfQJ0yNAm3tK3": {
