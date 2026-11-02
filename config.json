@@ -6,9 +6,6 @@
     "settingsLabelColor": "#1e293b",
     "settingsTitleColor": "#ffffff",
     "whiteIcons": true,
-    "hideMenus": [
-      "sb_reporting"
-    ],
     "agencyLogoUrl": "https://msgsndr-private.storage.googleapis.com/companyPhotos/01M65KBW7F7V2DXGZ021HTRS99_4VWDYY_0cfc89f1-2893-4b15-b943-d833807729f7.png"
   },
   "subaccounts": {
@@ -71,9 +68,6 @@
         "sb_payments",
         "sb_app-media",
         "sb_app-marketplace"
-      ],
-      "showMenus": [
-        "sb_reporting"
       ]
     }
   },
