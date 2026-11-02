@@ -211,7 +211,7 @@ var SETTINGS_MENUS = [
   { id: "sb_saas-billing", title: "SaaS Billing" },
   { id: "sb_conversations_providers", title: "Conversation Providers" }
 ].concat([
-  "Business Profile","My Profile","Billing","Users","Opportunities & Pipelines","Calendars",
+  "Business Profile","My Profile","Billing","Users","Opportunities & Pipelines",
   "Email Services","Custom Fields","Custom Values","Import Data","Integrations",
   "Private Integrations","Tags","Brand Boards"
 ].map(function (t) { return { id: "sub_" + t, title: t, byTitle: true }; }));
@@ -361,7 +361,13 @@ function renderCustom() {
     var b = document.createElement("span");
     b.className = "badge"; b.textContent = badgeText(c);
     row.appendChild(b);
-    row.appendChild(document.createElement("span"));
+    var ar = document.createElement("span");
+    ar.className = "arrows";
+    var x = document.createElement("button");
+    x.type = "button"; x.className = "mini"; x.textContent = "\u2715"; x.title = "Remove from this list";
+    x.onclick = function () { CUSTOM.splice(CUSTOM.indexOf(c), 1); renderRows(); };
+    ar.appendChild(x);
+    row.appendChild(ar);
     box.appendChild(row);
   });
 }
@@ -429,7 +435,7 @@ function loadSettings(s, isDefault) {
   var base = isDefault ? {} : ((CFG && CFG.default) || {});
   var baseIds = base.hideMenus || [];
   var baseTitles = base.hideMenuTitles || [];
-  var known = {}, keys = {}, titleKeys = {};
+  var known = {}, keys = {}, titleKeys = {}, knownTitles = {};
   MENUS.sort(function (a, b) { return DEFAULT_ORDER.indexOf(a.id) - DEFAULT_ORDER.indexOf(b.id); });
   ORDER_DIRTY = false;
   EXTRA_MOVES = s.moveMenus || [];
@@ -439,6 +445,9 @@ function loadSettings(s, isDefault) {
     keys[key] = true;
     if (m.byTitle) titleKeys[m.title] = true;
     var own = m.byTitle ? titles.indexOf(m.title) > -1 : ids.indexOf(m.id) > -1;
+    // older config hid this menu by name: show it on this row, not as a duplicate under Other menus
+    m.alsoTitle = !m.byTitle && titles.indexOf(m.title) > -1;
+    if (m.alsoTitle) { own = true; knownTitles[m.title] = true; }
     m.baseHidden = m.byTitle ? baseTitles.indexOf(m.title) > -1 : baseIds.indexOf(m.id) > -1;
     m.hidden = (own || m.baseHidden) && show.indexOf(key) === -1;
     m.name = m.byTitle ? (repl[m.title] || "") : (names[m.id] || "");
@@ -452,7 +461,7 @@ function loadSettings(s, isDefault) {
   ids.filter(function (id) { return !known[id]; }).forEach(function (id) {
     CUSTOM.push({ kind: "id", value: id, hidden: true, baseHidden: false });
   });
-  titles.filter(function (t) { return !titleKeys[t]; }).forEach(function (t) {
+  titles.filter(function (t) { return !titleKeys[t] && !knownTitles[t]; }).forEach(function (t) {
     CUSTOM.push({ kind: "title", value: t, hidden: true, baseHidden: false });
   });
   (s.hideSelectors || []).forEach(function (x) {
@@ -484,6 +493,7 @@ function collect() {
     var kind = m.kind || (m.byTitle ? "title" : "id");
     var val = m.kind ? m.value : keyOf(m);
     if (kind === "sel") { if (m.hidden) sels.push(val); return; }
+    if (m.alsoTitle && m.hidden && !m.baseHidden) hideTitles.push(m.title);
     if (m.hidden && !m.baseHidden) (kind === "title" ? hideTitles : hideIds).push(val);
     else if (!m.hidden && m.baseHidden) showKeys.push(val);
   });
