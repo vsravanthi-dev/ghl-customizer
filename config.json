@@ -33,7 +33,6 @@
         "sb_app-marketplace",
         "sb_payments",
         "sb_reputation",
-        "sb_media-storage",
         "sb_whatsapp",
         "sb_manage-scoring",
         "sb_manage-preferences",
@@ -45,7 +44,6 @@
         "sb_conversations_providers"
       ],
       "hideSelectors": [
-        "a[href*='/media-storage']",
         "a[href*='/reputation']",
         "a[href*='/marketing']",
         "a[href*='/reporting']",
