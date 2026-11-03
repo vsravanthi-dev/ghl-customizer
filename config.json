@@ -82,6 +82,14 @@
         "AI Agents",
         "Memberships",
         "Mobile App",
+        "Billing",
+        "Users",
+        "Email Services",
+        "Import Data",
+        "Integrations",
+        "Private Integrations",
+        "Tags",
+        "Brand Boards",
         "WA QR2"
       ],
       "hideMenus": [
@@ -92,7 +100,15 @@
         "sb_app-media",
         "sb_reporting",
         "sb_app-marketplace",
-        "sb_whatsapp"
+        "sb_whatsapp",
+        "sb_manage-scoring",
+        "sb_manage-preferences",
+        "sb_domains-urlRedirects",
+        "sb_external-tracking",
+        "sb_objects",
+        "sb_labs",
+        "sb_saas-billing",
+        "sb_conversations_providers"
       ]
     },
     "eHSTNuzvw9Vek4jMknK1": {
