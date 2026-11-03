@@ -134,10 +134,6 @@ async function getUsers() {
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   try {
-    // Password is checked only if ADMIN_PASSWORD is set in Vercel
-    if (process.env.ADMIN_PASSWORD && req.headers["x-admin-password"] !== process.env.ADMIN_PASSWORD) {
-      return res.status(401).json({ error: "Wrong password" });
-    }
 
     const action = req.query.action;
 
