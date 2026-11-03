@@ -96,7 +96,6 @@
         "sb_payments",
         "sb_email-marketing",
         "sb_automation",
-        "sb_sites",
         "sb_app-media",
         "sb_reporting",
         "sb_app-marketplace",
@@ -116,10 +115,35 @@
       "activeTextColor": "#0f766e",
       "settingsLabelColor": "#0f766e",
       "hideMenuTitles": [
+        "AI Agents",
+        "Memberships",
+        "Mobile App",
+        "Billing",
+        "Users",
+        "Email Services",
+        "Import Data",
+        "Integrations",
+        "Private Integrations",
+        "Tags",
+        "Brand Boards",
         "WA QR2"
       ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
+      "hideMenus": [
+        "sb_payments",
+        "sb_email-marketing",
+        "sb_automation",
+        "sb_app-media",
+        "sb_reporting",
+        "sb_app-marketplace",
+        "sb_whatsapp",
+        "sb_manage-scoring",
+        "sb_manage-preferences",
+        "sb_domains-urlRedirects",
+        "sb_external-tracking",
+        "sb_objects",
+        "sb_labs",
+        "sb_saas-billing",
+        "sb_conversations_providers"
       ]
     },
     "BYNHWalUytfAzIF53Msw": {
@@ -127,10 +151,35 @@
       "activeTextColor": "#0f766e",
       "settingsLabelColor": "#0f766e",
       "hideMenuTitles": [
+        "AI Agents",
+        "Memberships",
+        "Mobile App",
+        "Billing",
+        "Users",
+        "Email Services",
+        "Import Data",
+        "Integrations",
+        "Private Integrations",
+        "Tags",
+        "Brand Boards",
         "WA QR2"
       ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
+      "hideMenus": [
+        "sb_payments",
+        "sb_email-marketing",
+        "sb_automation",
+        "sb_app-media",
+        "sb_reporting",
+        "sb_app-marketplace",
+        "sb_whatsapp",
+        "sb_manage-scoring",
+        "sb_manage-preferences",
+        "sb_domains-urlRedirects",
+        "sb_external-tracking",
+        "sb_objects",
+        "sb_labs",
+        "sb_saas-billing",
+        "sb_conversations_providers"
       ]
     },
     "C9b8vqSkoqyL0iq3Z2nm": {
@@ -138,10 +187,35 @@
       "activeTextColor": "#0f766e",
       "settingsLabelColor": "#0f766e",
       "hideMenuTitles": [
+        "AI Agents",
+        "Memberships",
+        "Mobile App",
+        "Billing",
+        "Users",
+        "Email Services",
+        "Import Data",
+        "Integrations",
+        "Private Integrations",
+        "Tags",
+        "Brand Boards",
         "WA QR2"
       ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
+      "hideMenus": [
+        "sb_payments",
+        "sb_email-marketing",
+        "sb_automation",
+        "sb_app-media",
+        "sb_reporting",
+        "sb_app-marketplace",
+        "sb_whatsapp",
+        "sb_manage-scoring",
+        "sb_manage-preferences",
+        "sb_domains-urlRedirects",
+        "sb_external-tracking",
+        "sb_objects",
+        "sb_labs",
+        "sb_saas-billing",
+        "sb_conversations_providers"
       ]
     },
     "R9k3EzZkDANa4emKSizB": {
@@ -149,10 +223,35 @@
       "activeTextColor": "#0f766e",
       "settingsLabelColor": "#0f766e",
       "hideMenuTitles": [
+        "AI Agents",
+        "Memberships",
+        "Mobile App",
+        "Billing",
+        "Users",
+        "Email Services",
+        "Import Data",
+        "Integrations",
+        "Private Integrations",
+        "Tags",
+        "Brand Boards",
         "WA QR2"
       ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
+      "hideMenus": [
+        "sb_payments",
+        "sb_email-marketing",
+        "sb_automation",
+        "sb_app-media",
+        "sb_reporting",
+        "sb_app-marketplace",
+        "sb_whatsapp",
+        "sb_manage-scoring",
+        "sb_manage-preferences",
+        "sb_domains-urlRedirects",
+        "sb_external-tracking",
+        "sb_objects",
+        "sb_labs",
+        "sb_saas-billing",
+        "sb_conversations_providers"
       ]
     },
     "vtEMaPhf7DS8CH30gakW": {
@@ -160,10 +259,35 @@
       "activeTextColor": "#0f766e",
       "settingsLabelColor": "#0f766e",
       "hideMenuTitles": [
+        "AI Agents",
+        "Memberships",
+        "Mobile App",
+        "Billing",
+        "Users",
+        "Email Services",
+        "Import Data",
+        "Integrations",
+        "Private Integrations",
+        "Tags",
+        "Brand Boards",
         "WA QR2"
       ],
-      "hideHeadings": [
-        "OTHER SETTINGS"
+      "hideMenus": [
+        "sb_payments",
+        "sb_email-marketing",
+        "sb_automation",
+        "sb_app-media",
+        "sb_reporting",
+        "sb_app-marketplace",
+        "sb_whatsapp",
+        "sb_manage-scoring",
+        "sb_manage-preferences",
+        "sb_domains-urlRedirects",
+        "sb_external-tracking",
+        "sb_objects",
+        "sb_labs",
+        "sb_saas-billing",
+        "sb_conversations_providers"
       ]
     }
   }
