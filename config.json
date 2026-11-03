@@ -94,6 +94,7 @@
         "sites"
       ],
       "hideMenus": [
+        "sb_opportunities",
         "sb_payments",
         "sb_email-marketing",
         "sb_automation",
