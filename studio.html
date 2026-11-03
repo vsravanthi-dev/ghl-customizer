@@ -393,7 +393,35 @@ function renderCustom() {
 function renderRows() {
   renderList("menuList", MENUS, true);
   renderList("settingsList", SETTINGS_MENUS, false);
+  addBulk("menuList", MENUS);
+  addBulk("settingsList", SETTINGS_MENUS);
   renderCustom();
+}
+function addBulk(boxId, list) {
+  var rows = $(boxId).children;
+  list.forEach(function (m, i) { if (rows[i]) rows[i].appendChild(bulkBtns(m)); });
+}
+function bulkBtns(m) {
+  var w = document.createElement("span");
+  w.className = "bulk";
+  [["Show all", "show"], ["Hide all", "hide"]].forEach(function (x) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "mini"; b.textContent = x[0];
+    b.title = x[1] === "hide" ? "Hide this menu in all sub-accounts and users" : "Show this menu in all sub-accounts and users";
+    b.onclick = function () {
+      var word = x[1] === "hide" ? "Hide" : "Show";
+      if (!confirm(word + " " + m.title + " in ALL sub-accounts and users?")) return;
+      say("Saving...");
+      api("bulk", { id: m.id, title: m.title, byTitle: !!m.byTitle, mode: x[1] })
+        .then(function () {
+          fill();
+          setTimeout(function () { say(m.title + ": " + word.toLowerCase() + " for all done. Sidebar updates in about a minute.", "ok"); }, 400);
+        })
+        .catch(function (e) { say(e.message, "err"); });
+    };
+    w.appendChild(b);
+  });
+  return w;
 }
 function setAll(list, hide) {
   list.forEach(function (m) { m.hidden = hide; });
