@@ -28,9 +28,8 @@
         "sb_dashboard",
         "sb_payments",
         "sb_email-marketing",
+        "sb_reporting",
         "sb_app-marketplace",
-        "sb_marketing",
-        "sb_reputation",
         "sb_whatsapp",
         "sb_manage-scoring",
         "sb_manage-preferences",
@@ -39,7 +38,9 @@
         "sb_objects",
         "sb_labs",
         "sb_saas-billing",
-        "sb_conversations_providers"
+        "sb_conversations_providers",
+        "sb_marketing",
+        "sb_reputation"
       ],
       "hideSelectors": [
         "a[href*='/reputation']",
@@ -48,17 +49,19 @@
         "a[href*='marketplace']"
       ],
       "hideMenuTitles": [
-        "Billing",
-        "Email Services",
+        "Memberships",
+        "Mobile App",
         "WhatsApp",
-        "Objects",
-        "Import Data",
         "Manage Scoring",
         "Domains & URL Redirects",
         "External Tracking",
-        "Conversation Providers",
-        "Tags",
+        "Objects",
         "Labs",
+        "Conversation Providers",
+        "Billing",
+        "Email Services",
+        "Import Data",
+        "Tags",
         "Brand Boards",
         "WA QR2"
       ]
