@@ -135,7 +135,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
           <div class="sechead"><h3>Other menus</h3></div>
           <div class="hint">Anything not listed above: type its name as shown in the sidebar, or its id (like sb_reputation), or a CSS selector.</div>
           <div class="addrow">
-            <input type="text" id="customIn" placeholder="e.g. WA QR2">
+            <input type="text" id="customIn" placeholder="e.g. Reputation">
             <button type="button" class="mini" id="customAdd">Add</button>
           </div>
           <div id="customList"></div>
@@ -209,6 +209,7 @@ var CUSTOM = [];
 var ORDER_DIRTY = false;
 var MENUS = [
   { id: "sb_dashboard", title: "Dashboard" },
+  { id: "sb_DashBoard", title: "DashBoard", byTitle: true },
   { id: "sb_conversations", title: "Conversations" },
   { id: "sb_calendars", title: "Calendars" },
   { id: "sb_contacts", title: "Contacts" },
@@ -224,10 +225,12 @@ var MENUS = [
   { id: "sb_app-marketplace", title: "App Marketplace" },
   { id: "sb_Mobile App", title: "Mobile App", byTitle: true },
   { id: "sb_whatsapp", title: "WhatsApp" },
+  { id: "sb_WA QR2", title: "WA QR2", byTitle: true },
   { id: "sb_settings", title: "Settings" }
 ];
 var DEFAULT_ORDER = MENUS.map(function (m) { return m.id; });
 // Items inside Settings. Titles are guessed, so check them against GHL.
+// "key" is used instead of the title when the same name also exists in the main menu.
 var SETTINGS_MENUS = [
   { id: "sb_manage-scoring", title: "Manage Scoring" },
   { id: "sb_manage-preferences", title: "Manage Preferences" },
@@ -236,7 +239,8 @@ var SETTINGS_MENUS = [
   { id: "sb_objects", title: "Objects" },
   { id: "sb_labs", title: "Labs" },
   { id: "sb_saas-billing", title: "SaaS Billing" },
-  { id: "sb_conversations_providers", title: "Conversation Providers" }
+  { id: "sb_conversations_providers", title: "Conversation Providers" },
+  { id: "sub_Calendars", title: "Calendars", key: "Settings > Calendars", byTitle: true }
 ].concat([
   "Business Profile","My Profile","Billing","Users","Opportunities & Pipelines",
   "Email Services","Custom Fields","Custom Values","Import Data","Integrations",
@@ -277,6 +281,7 @@ TABS.forEach(function (g) {
 var SETTINGS_TABS = [
   ["My Profile", ["General", "Security", "Email and conversations", "Calendar", "Notifications"]],
   ["Opportunities & Pipelines", ["Opportunities & Pipelines", "Pipelines"]],
+  ["Calendars", ["Calendars", "Preferences", "Availability", "Connections"]],
   ["Email Services", ["SMTP Service", "Reply & Forward Settings", "Email Analytics", "Risk Assessment", "Bounce Classification", "Postmaster Tools"]],
   ["Custom Fields", ["All", "Contact", "Opportunity", "Company"]],
   ["Custom Values", ["All values", "Folders"]],
@@ -319,7 +324,7 @@ function say(t, c) { $("msg").textContent = t; $("msg").className = c || ""; }
 function csv(s) { return s.split(",").map(function (x) { return x.trim(); }).filter(Boolean); }
 function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
 function allMenus() { return MENUS.concat(SETTINGS_MENUS); }
-function keyOf(m) { return m.byTitle ? m.title : m.id; }
+function keyOf(m) { return m.byTitle ? (m.key || m.title) : m.id; }
 function dflt(k, fb) { var d = (CFG && CFG.default) || {}; return d[k] || fb; }
 function colorVal(k, fb) { var v = $(k).value.trim(); return HEX.test(v) ? v : dflt(k, fb); }
 function setColor(k, v) {
@@ -497,7 +502,7 @@ function bulkBtns(m, tabs) {
       var word = x[1] === "hide" ? "Hide" : "Show";
       if (!confirm(word + " " + m.title + " in ALL sub-accounts and users?")) return;
       say("Saving...");
-      api("bulk", { id: m.id, title: m.title, byTitle: !!m.byTitle, mode: x[1] })
+      api("bulk", { id: m.id, title: keyOf(m), byTitle: !!m.byTitle, mode: x[1] })
         .then(function () {
           fill();
           setTimeout(function () { say(m.title + ": " + word.toLowerCase() + " for all done. Sidebar updates in about a minute.", "ok"); }, 400);
@@ -593,14 +598,14 @@ function loadSettings(s, isDefault) {
     known[m.id] = true;
     var key = keyOf(m);
     keys[key] = true;
-    if (m.byTitle) titleKeys[m.title] = true;
-    var own = m.byTitle ? titles.indexOf(m.title) > -1 : ids.indexOf(m.id) > -1;
+    if (m.byTitle) titleKeys[keyOf(m)] = true;
+    var own = m.byTitle ? titles.indexOf(keyOf(m)) > -1 : ids.indexOf(m.id) > -1;
     // older config hid this menu by name: show it on this row, not as a duplicate under Other menus
     m.alsoTitle = !m.byTitle && titles.indexOf(m.title) > -1;
     if (m.alsoTitle) { own = true; knownTitles[m.title] = true; }
-    m.baseHidden = m.byTitle ? baseTitles.indexOf(m.title) > -1 : baseIds.indexOf(m.id) > -1;
+    m.baseHidden = m.byTitle ? baseTitles.indexOf(keyOf(m)) > -1 : baseIds.indexOf(m.id) > -1;
     m.hidden = (own || m.baseHidden) && show.indexOf(key) === -1;
-    m.name = m.byTitle ? (repl[m.title] || "") : (names[m.id] || "");
+    m.name = m.byTitle ? (repl[keyOf(m)] || "") : (names[m.id] || "");
   });
   EXTRA_SHOW = show.filter(function (k) { return !keys[k]; });
   EXTRA_NAMES = {};
@@ -665,7 +670,7 @@ function collect() {
   allMenus().forEach(function (m) {
     var n = (m.name || "").trim();
     if (!n || n === m.title) return;
-    if (m.byTitle) tr[m.title] = n; else names[m.id] = n;
+    if (m.byTitle) tr[keyOf(m)] = n; else names[m.id] = n;
   });
   s.menuNames = names;
   s.textReplace = tr;
