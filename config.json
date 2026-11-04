@@ -7,6 +7,9 @@
     "settingsTitleColor": "#ffffff",
     "whiteIcons": true,
     "agencyLogoUrl": "https://msgsndr-private.storage.googleapis.com/companyPhotos/01M65KBW7F7V2DXGZ021HTRS99_4VWDYY_0cfc89f1-2893-4b15-b943-d833807729f7.png",
+    "hideMenuTitles": [
+      "DashBoard"
+    ],
     "hideTabs": [
       "Conversations > Manual Actions",
       "Conversations > Trigger Links",
@@ -31,6 +34,9 @@
           "title": "DashBoard",
           "before": "Conversations"
         }
+      ],
+      "showMenus": [
+        "DashBoard"
       ],
       "textReplace": {
         "Opportunities": "Sales Pipeline"
