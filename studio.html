@@ -59,6 +59,13 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
 .ulist{max-height:190px;overflow:auto;border:1px solid var(--line);border-radius:7px;background:var(--bg);padding:2px 10px}
 .uitem{display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0;cursor:pointer}
 .ubtns{display:flex;gap:6px;margin-top:6px;align-items:center}
+.mrow.sub{padding-left:36px;background:var(--bg)}
+.mrow.sub .mtitle{font-weight:400}
+.mrow.dim{opacity:.5}
+.tg{background:transparent;border:0;color:var(--ink);cursor:pointer;font-size:13px;padding:0 6px 0 0}
+.pvtb{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:8px;font-size:13px}
+.pvtb b{display:block;margin-bottom:4px}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:2px 8px;margin:2px 4px 2px 0;background:var(--bg)}
 @media(max-width:760px){.studio{grid-template-columns:1fr}.pvwrap{position:static}.bar{grid-template-columns:1fr}.mrow{grid-template-columns:34px 1fr 64px}.mrow .rn,.badge{display:none}.cgrid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -111,8 +118,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
       <div class="card">
         <div class="tabs">
           <button type="button" class="tab on" id="tabMenu">Menu</button>
-          <button type="button" class="tab" id="tabSub">Sub-menus</button>
-          <button type="button" class="tab" id="tabTabs">Tabs</button>
+          <button type="button" class="tab" id="tabSub">Settings menu</button>
           <button type="button" class="tab" id="tabTheme">Theme</button>
         </div>
 
@@ -147,11 +153,6 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
           <div id="settingsList"></div>
         </div>
 
-        <div id="panelTabs" class="hidden">
-          <div class="hint">Top tabs inside each menu. Eye = hide or show. Saved as "Menu &gt; Tab", so the same name in two menus never clashes.</div>
-          <div id="tabList"></div>
-        </div>
-
         <div id="panelTheme" class="hidden">
           <label for="logoUrl" style="margin-top:0">Logo URL <span class="hint">shown at the top of the sidebar</span></label>
           <input type="text" id="logoUrl" placeholder="https://...">
@@ -172,6 +173,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
           <div id="pvLogo"></div>
           <div id="pvList"></div>
         </div>
+        <div id="pvTabs"></div>
       </div>
     </div>
   </div>
@@ -271,6 +273,24 @@ TABS.forEach(function (g) {
     TABLIST.push({ menu: g[0], title: t, key: g[0] + " > " + t, hidden: false, baseHidden: false });
   });
 });
+// Tabs inside Settings pages. Saved as "Settings > Page > Tab".
+var SETTINGS_TABS = [["My Profile", ["General", "Security", "Email and conversations", "Calendar", "Notifications"]]];
+var TABMAP = { "Opportunities": "Sales Pipeline", "App Marketplace": "Marketplace" };
+var OPEN = {};
+SETTINGS_TABS.forEach(function (g) {
+  g[1].forEach(function (t) {
+    var menu = "Settings > " + g[0];
+    TABLIST.push({ menu: menu, title: t, key: menu + " > " + t, hidden: false, baseHidden: false });
+  });
+});
+function tabsOf(m, isSettings) {
+  var grp = isSettings ? "Settings > " + m.title : (TABMAP[m.title] || m.title);
+  return TABLIST.filter(function (x) { return x.menu === grp; });
+}
+function checkAllHidden(m, tabs) {
+  if (tabs.length && tabs.every(function (x) { return x.hidden; }) && !m.hidden &&
+      confirm("All tabs hidden. Hide the page too?")) m.hidden = true;
+}
 var EYE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 var EYEOFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/></svg>';
 var HEX = /^#[0-9a-f]{6}$/i;
@@ -343,23 +363,34 @@ function buildColors() {
 function badgeText(m) {
   return m.hidden ? (m.baseHidden ? "Hidden (all)" : "Hidden") : (m.baseHidden ? "Shown here" : "");
 }
-function eyeBtn(m) {
+function eyeBtn(m, after) {
   var eye = document.createElement("button");
   eye.type = "button"; eye.className = "eye";
   eye.innerHTML = m.hidden ? EYEOFF : EYE;
   eye.title = m.hidden ? "Hidden. Click to show" : "Visible. Click to hide";
-  eye.onclick = function () { m.hidden = !m.hidden; renderRows(); renderPreview(); };
+  eye.onclick = function () { m.hidden = !m.hidden; if (after) after(); renderRows(); renderPreview(); };
   return eye;
 }
-function renderList(boxId, list, arrows) {
+function renderList(boxId, list, arrows, isSettings) {
   var box = $(boxId);
   box.innerHTML = "";
   list.forEach(function (m, i) {
+    var tabs = tabsOf(m, isSettings);
+    var ok = (isSettings ? "s:" : "m:") + m.title;
     var row = document.createElement("div");
     row.className = "mrow" + (m.hidden ? " off" : "");
     row.appendChild(eyeBtn(m));
     var t = document.createElement("span");
-    t.className = "mtitle"; t.textContent = m.title;
+    t.className = "mtitle";
+    if (tabs.length) {
+      var tg = document.createElement("button");
+      tg.type = "button"; tg.className = "tg";
+      tg.textContent = OPEN[ok] ? "\u25BE" : "\u25B8";
+      tg.title = "Show / hide tabs";
+      tg.onclick = function () { OPEN[ok] = !OPEN[ok]; renderRows(); renderPreview(); };
+      t.appendChild(tg);
+      t.appendChild(document.createTextNode(m.title));
+    } else t.textContent = m.title;
     row.appendChild(t);
     var inp = document.createElement("input");
     inp.type = "text"; inp.className = "rn"; inp.placeholder = "Rename"; inp.value = m.name || "";
@@ -386,44 +417,25 @@ function renderList(boxId, list, arrows) {
       });
     }
     row.appendChild(ar);
+    row.appendChild(bulkBtns(m, tabs));
     box.appendChild(row);
-  });
-}
-function renderTabs() {
-  var box = $("tabList");
-  box.innerHTML = "";
-  TABS.forEach(function (g) {
-    var items = TABLIST.filter(function (x) { return x.menu === g[0]; });
-    var head = document.createElement("div");
-    head.className = "sechead";
-    var h = document.createElement("h3");
-    h.textContent = g[0];
-    head.appendChild(h);
-    var bulk = document.createElement("span");
-    bulk.className = "bulk";
-    [["Show all", false], ["Hide all", true]].forEach(function (x) {
-      var b = document.createElement("button");
-      b.type = "button"; b.className = "mini"; b.textContent = x[0];
-      b.onclick = function () { items.forEach(function (m) { m.hidden = x[1]; }); renderRows(); };
-      bulk.appendChild(b);
-    });
-    head.appendChild(bulk);
-    box.appendChild(head);
-    items.forEach(function (m) {
-      var row = document.createElement("div");
-      row.className = "mrow" + (m.hidden ? " off" : "");
-      row.appendChild(eyeBtn(m));
-      var t = document.createElement("span");
-      t.className = "mtitle"; t.textContent = m.title;
-      row.appendChild(t);
-      var gap = document.createElement("span");
-      gap.className = "rn";
-      row.appendChild(gap);
-      var b = document.createElement("span");
-      b.className = "badge"; b.textContent = badgeText(m);
-      row.appendChild(b);
-      box.appendChild(row);
-    });
+    if (tabs.length && OPEN[ok]) {
+      tabs.forEach(function (x) {
+        var r = document.createElement("div");
+        r.className = "mrow sub" + (x.hidden ? " off" : "") + (m.hidden ? " dim" : "");
+        r.appendChild(eyeBtn(x, function () { checkAllHidden(m, tabs); }));
+        var tt = document.createElement("span");
+        tt.className = "mtitle"; tt.textContent = x.title;
+        r.appendChild(tt);
+        var gap = document.createElement("span");
+        gap.className = "rn";
+        r.appendChild(gap);
+        var bd = document.createElement("span");
+        bd.className = "badge"; bd.textContent = badgeText(x);
+        r.appendChild(bd);
+        box.appendChild(r);
+      });
+    }
   });
 }
 function renderCustom() {
@@ -454,25 +466,26 @@ function renderCustom() {
   });
 }
 function renderRows() {
-  renderList("menuList", MENUS, true);
-  renderList("settingsList", SETTINGS_MENUS, false);
-  addBulk("menuList", MENUS);
-  addBulk("settingsList", SETTINGS_MENUS);
+  renderList("menuList", MENUS, true, false);
+  renderList("settingsList", SETTINGS_MENUS, false, true);
   renderCustom();
-  renderTabs();
 }
-function addBulk(boxId, list) {
-  var rows = $(boxId).children;
-  list.forEach(function (m, i) { if (rows[i]) rows[i].appendChild(bulkBtns(m)); });
-}
-function bulkBtns(m) {
+function bulkBtns(m, tabs) {
   var w = document.createElement("span");
   w.className = "bulk";
   [["Show all", "show"], ["Hide all", "hide"]].forEach(function (x) {
     var b = document.createElement("button");
     b.type = "button"; b.className = "mini"; b.textContent = x[0];
-    b.title = x[1] === "hide" ? "Hide this menu in all sub-accounts and users" : "Show this menu in all sub-accounts and users";
+    var hasTabs = tabs && tabs.length;
+    b.title = hasTabs ? x[0] + " tabs of this page"
+      : x[1] === "hide" ? "Hide this menu in all sub-accounts and users" : "Show this menu in all sub-accounts and users";
     b.onclick = function () {
+      if (hasTabs) {
+        tabs.forEach(function (t) { t.hidden = x[1] === "hide"; });
+        if (x[1] === "hide") checkAllHidden(m, tabs);
+        renderRows(); renderPreview();
+        return;
+      }
       var word = x[1] === "hide" ? "Hide" : "Show";
       if (!confirm(word + " " + m.title + " in ALL sub-accounts and users?")) return;
       say("Saving...");
@@ -534,6 +547,24 @@ function renderPreview() {
     if (first) { d.style.background = "#ffffff"; d.style.color = act; first = false; }
     else d.style.color = txt;
     list.appendChild(d);
+  });
+  var tb = $("pvTabs");
+  tb.innerHTML = "";
+  (onSub ? SETTINGS_MENUS : MENUS).forEach(function (m) {
+    if (m.hidden || !OPEN[(onSub ? "s:" : "m:") + m.title]) return;
+    var vis = tabsOf(m, onSub).filter(function (x) { return !x.hidden; });
+    var d = document.createElement("div");
+    d.className = "pvtb";
+    var hh = document.createElement("b");
+    hh.textContent = (onSub ? "Settings \u203A " : "") + ((m.name || "").trim() || m.title) + " \u203A";
+    d.appendChild(hh);
+    vis.forEach(function (x) {
+      var c = document.createElement("span");
+      c.className = "chip"; c.textContent = x.title;
+      d.appendChild(c);
+    });
+    if (!vis.length) d.appendChild(document.createTextNode("No tabs visible"));
+    tb.appendChild(d);
   });
 }
 
@@ -779,16 +810,13 @@ function tab(which) {
   $("panelMenu").classList.toggle("hidden", which !== "menu");
   $("panelTheme").classList.toggle("hidden", which !== "theme");
   $("panelSub").classList.toggle("hidden", which !== "sub");
-  $("panelTabs").classList.toggle("hidden", which !== "tabs");
   $("tabMenu").classList.toggle("on", which === "menu");
   $("tabSub").classList.toggle("on", which === "sub");
-  $("tabTabs").classList.toggle("on", which === "tabs");
   $("tabTheme").classList.toggle("on", which === "theme");
   renderPreview();
 }
 $("tabMenu").onclick = function () { tab("menu"); };
 $("tabSub").onclick = function () { tab("sub"); };
-$("tabTabs").onclick = function () { tab("tabs"); };
 $("tabTheme").onclick = function () { tab("theme"); };
 $("logoUrl").oninput = renderPreview;
 
