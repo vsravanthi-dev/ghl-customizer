@@ -34,7 +34,6 @@
         "Brand Boards"
       ],
       "hideMenus": [
-        "sb_dashboard",
         "sb_payments",
         "sb_email-marketing",
         "sb_app-media",
