@@ -24,37 +24,8 @@
       "textReplace": {
         "Opportunities": "Sales Pipeline"
       },
-      "hideMenus": [
-        "sb_manage-scoring",
-        "sb_manage-preferences",
-        "sb_domains-urlRedirects",
-        "sb_external-tracking",
-        "sb_objects",
-        "sb_labs",
-        "sb_saas-billing",
-        "sb_conversations_providers",
-        "sb_marketing",
-        "sb_reputation"
-      ],
-      "hideSelectors": [
-        "a[href*='/reputation']",
-        "a[href*='/marketing']",
-        "a[href*='/reporting']",
-        "a[href*='marketplace']"
-      ],
       "hideMenuTitles": [
-        "Manage Scoring",
-        "Domains & URL Redirects",
-        "External Tracking",
-        "Objects",
-        "Labs",
-        "Conversation Providers",
-        "Email Services",
-        "Import Data",
-        "Tags",
-        "Brand Boards",
-        "WA QR2",
-        "Manual Actions"
+        "WA QR2"
       ]
     },
     "NxLoq60TfQJ0yNAm3tK3": {
