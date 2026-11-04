@@ -274,7 +274,15 @@ TABS.forEach(function (g) {
   });
 });
 // Tabs inside Settings pages. Saved as "Settings > Page > Tab".
-var SETTINGS_TABS = [["My Profile", ["General", "Security", "Email and conversations", "Calendar", "Notifications"]]];
+var SETTINGS_TABS = [
+  ["My Profile", ["General", "Security", "Email and conversations", "Calendar", "Notifications"]],
+  ["Opportunities & Pipelines", ["Opportunities & Pipelines", "Pipelines"]],
+  ["Email Services", ["SMTP Service", "Reply & Forward Settings", "Email Analytics", "Risk Assessment", "Bounce Classification", "Postmaster Tools"]],
+  ["Custom Fields", ["All", "Contact", "Opportunity", "Company"]],
+  ["Custom Values", ["All values", "Folders"]],
+  ["Domains & URL Redirects", ["Domains", "URL Redirects"]],
+  ["External Tracking", ["Installation", "Troubleshoot"]]
+];
 var TABMAP = { "Opportunities": "Sales Pipeline", "App Marketplace": "Marketplace" };
 var OPEN = {};
 SETTINGS_TABS.forEach(function (g) {
