@@ -691,6 +691,7 @@ function collect() {
   });
   s.hideTabs = uniq(hT.concat(EXTRA_HIDET));
   s.showTabs = uniq(sT.concat(EXTRA_SHOWT));
+    s.settingsOrder = SET_DIRTY ? SETTINGS_MENUS.filter(function (m) { return SET_TOUCHED[m.title]; }).map(function (m) { return m.title; }) : EXTRA_SETORDER;
   s.hideHeadings = [];
   s.moveMenus = buildMoves();
   return s;
