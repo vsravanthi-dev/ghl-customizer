@@ -593,7 +593,17 @@ function loadSettings(s, isDefault) {
   var known = {}, keys = {}, titleKeys = {}, knownTitles = {};
   MENUS.sort(function (a, b) { return DEFAULT_ORDER.indexOf(a.id) - DEFAULT_ORDER.indexOf(b.id); });
   ORDER_DIRTY = false;
-  EXTRA_MOVES = s.moveMenus || [];
+    EXTRA_MOVES = s.moveMenus || [];
+  if (!SET_DEFAULT) SET_DEFAULT = SETTINGS_MENUS.map(function (m) { return m.id; });
+  SETTINGS_MENUS.sort(function (a, b) { return SET_DEFAULT.indexOf(a.id) - SET_DEFAULT.indexOf(b.id); });
+  SET_DIRTY = false; SET_TOUCHED = {};
+  EXTRA_SETORDER = s.settingsOrder || [];
+  (function (order) {
+    var idx = [], items = [];
+    SETTINGS_MENUS.forEach(function (m, i) { if (order.indexOf(m.title) > -1) { idx.push(i); items.push(m); } });
+    items.sort(function (a, b) { return order.indexOf(a.title) - order.indexOf(b.title); });
+    idx.forEach(function (pos, k) { SETTINGS_MENUS[pos] = items[k]; });
+  })(EXTRA_SETORDER);
   allMenus().forEach(function (m) {
     known[m.id] = true;
     var key = keyOf(m);
