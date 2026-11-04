@@ -26,6 +26,7 @@
       },
       "hideMenuTitles": [
         "Memberships",
+        "Mobile App",
         "Billing",
         "Email Services",
         "Import Data",
@@ -47,6 +48,16 @@
         "sb_labs",
         "sb_saas-billing",
         "sb_conversations_providers"
+      ],
+      "hideTabs": [
+        "Conversations > Manual Actions",
+        "Conversations > Trigger Links",
+        "Conversations > Analytics",
+        "Contacts > Companies",
+        "Sales Pipeline > Forecast",
+        "Automation > Global Workflow Settings",
+        "Sites > SEO",
+        "Sites > Analytics"
       ]
     },
     "NxLoq60TfQJ0yNAm3tK3": {
