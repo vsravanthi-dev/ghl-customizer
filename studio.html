@@ -206,7 +206,7 @@ function userLabel(id) {
 var lastFill = "";
 var EXTRA_NAMES = {}, EXTRA_REPL = {}, EXTRA_SHOW = [], EXTRA_MOVES = [];
 var CUSTOM = [];
-var ORDER_DIRTY = false;
+var ORDER_DIRTY = false, SET_DIRTY = false, SET_TOUCHED = {}, EXTRA_SETORDER = [], SET_DEFAULT = null;
 var MENUS = [
   { id: "sb_dashboard", title: "Dashboard" },
   { id: "sb_DashBoard", title: "DashBoard", byTitle: true },
@@ -480,7 +480,7 @@ function renderCustom() {
 }
 function renderRows() {
   renderList("menuList", MENUS, true, false);
-  renderList("settingsList", SETTINGS_MENUS, false, true);
+    renderList("settingsList", SETTINGS_MENUS, true, true);
   renderCustom();
 }
 function bulkBtns(m, tabs) {
