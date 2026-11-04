@@ -87,15 +87,22 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
         <div>
           <label for="scope" style="margin-top:0">Settings for</label>
           <select id="scope">
-            <option value="subaccounts">A sub-account</option>
+            <option value="subaccounts">Sub-accounts</option>
             <option value="users">Users (in every sub-account)</option>
             <option value="everyone">Everyone (all sub-accounts and users)</option>
           </select>
         </div>
         <div>
           <div id="locBox">
-            <label for="loc" style="margin-top:0">Sub-account</label>
-            <select id="loc"></select>
+            <label for="locSearch" style="margin-top:0">Sub-accounts <span class="hint">tick one or more</span></label>
+            <input type="text" id="locSearch" placeholder="Search sub-accounts" autocomplete="off">
+            <div id="locList" class="ulist" style="margin-top:6px"></div>
+            <div class="ubtns">
+              <button type="button" class="mini" id="lAll">Select all shown</button>
+              <button type="button" class="mini" id="lNone">Clear</button>
+              <span id="locCount" class="hint"></span>
+            </div>
+            <div class="hint" style="margin-top:6px">The form shows the first ticked sub-account's settings. Saving copies the form to every ticked sub-account.</div>
           </div>
           <div id="userBox" class="hidden">
             <label style="margin-top:0">Users <span class="hint">tick one or more</span></label>
@@ -184,6 +191,7 @@ var $ = function (id) { return document.getElementById(id); };
 var pw = sessionStorage.getItem("adminPw") || "";
 var CFG = null;
 var USERS = {};
+var LOCS = [], locSel = [];
 // Names for known users, used when GHL cannot give them. The letters I/l and O/0 look alike in IDs, so they are matched loosely.
 var SEED_NAMES = {
   "zn75wx7Yp68SsLbZ7Ee0": "Arjun Shetty",
@@ -286,7 +294,7 @@ var SETTINGS_TABS = [
   ["Custom Fields", ["All", "Contact", "Opportunity", "Company"]],
   ["Custom Values", ["All values", "Folders"]],
   ["Domains & URL Redirects", ["Domains", "URL Redirects"]],
-  ["External Tracking", ["Installation", "Troubleshoot"]]
+  ["External Tracking", ["Installation", "Troubleshoot", "Settings"]]
 ];
 var TABMAP = { "Opportunities": "Sales Pipeline", "App Marketplace": "Marketplace" };
 var OPEN = {};
@@ -715,8 +723,8 @@ function target() {
     var ids = selectedUsers();
     return { scope: "users", id: ids[0] || "", ids: ids };
   }
-  var l = $("loc").value;
-  return { scope: "subaccounts", id: l, ids: l ? [l] : [] };
+  var locs = locSel.slice();
+  return { scope: "subaccounts", id: locs[0] || "", ids: locs };
 }
 function fill() {
   var t = target();
@@ -734,6 +742,43 @@ function userChanged() {
   var ids = selectedUsers();
   $("userCount").textContent = ids.length ? ids.length + " selected" : "";
   if ((ids[0] || "") !== lastFill) fill();
+}
+// Sub-accounts: search + tick boxes. locSel keeps the ticked IDs in the order they were ticked.
+function shownLocs() {
+  var term = $("locSearch").value.trim().toLowerCase();
+  return LOCS.filter(function (l) { return l.name.toLowerCase().indexOf(term) > -1; });
+}
+function buildLocs() {
+  var ul = $("locList");
+  ul.innerHTML = "";
+  var shown = shownLocs();
+  if (!shown.length) {
+    var e = document.createElement("div");
+    e.className = "hint"; e.style.padding = "8px 0";
+    e.textContent = LOCS.length ? "No sub-account found" : "No sub-accounts loaded";
+    ul.appendChild(e);
+  }
+  shown.forEach(function (l) {
+    var lb = document.createElement("label");
+    lb.className = "uitem";
+    lb.title = l.id;
+    var c = document.createElement("input");
+    c.type = "checkbox"; c.value = l.id; c.checked = locSel.indexOf(l.id) > -1;
+    c.onchange = function () {
+      var i = locSel.indexOf(l.id);
+      if (c.checked && i === -1) locSel.push(l.id);
+      if (!c.checked && i > -1) locSel.splice(i, 1);
+      locChanged();
+    };
+    lb.appendChild(c);
+    lb.appendChild(document.createTextNode(l.name));
+    ul.appendChild(lb);
+  });
+  $("locCount").textContent = locSel.length ? locSel.length + " selected" : "";
+}
+function locChanged() {
+  $("locCount").textContent = locSel.length ? locSel.length + " selected" : "";
+  if ((locSel[0] || "") !== lastFill) fill();
 }
 function addOpt(sel, value, text) {
   var o = document.createElement("option");
@@ -775,9 +820,8 @@ function start() {
     $("login").classList.add("hidden");
     $("app").classList.remove("hidden");
     list.sort(function (a, b) { return a.name.localeCompare(b.name); });
-    $("loc").innerHTML = "";
-    addOpt($("loc"), "", "Choose a sub-account");
-    list.forEach(function (l) { addOpt($("loc"), l.id, l.name); });
+    LOCS = list;
+    buildLocs();
     return api("users").then(function (u) {
       USERS = {};
       if (Array.isArray(u)) u.forEach(function (x) { USERS[x.id] = x.name; });
@@ -811,9 +855,19 @@ $("scope").onchange = function () {
   say("");
   if (sc === "everyone") fill();
   else if (sc === "users") userChanged();
-  else if ($("loc").value) fill();
+  else locChanged();
 };
-$("loc").onchange = fill;
+$("locSearch").oninput = buildLocs;
+$("lAll").onclick = function () {
+  shownLocs().forEach(function (l) { if (locSel.indexOf(l.id) === -1) locSel.push(l.id); });
+  buildLocs();
+  locChanged();
+};
+$("lNone").onclick = function () {
+  locSel = [];
+  buildLocs();
+  locChanged();
+};
 $("uid").onchange = userChanged;
 $("uAll").onclick = function () {
   document.querySelectorAll("#userList input").forEach(function (c) { c.checked = true; });
@@ -847,6 +901,8 @@ $("logoUrl").oninput = renderPreview;
 $("save").onclick = function () {
   var t = target();
   if (!t.ids.length) { say("Choose who the settings are for first.", "err"); return; }
+  if (t.scope === "subaccounts" && t.ids.length > 1 &&
+      !confirm("Copy these settings to " + t.ids.length + " sub-accounts? Their current settings will be replaced.")) return;
   say("Saving...");
   // names typed as id=Name are saved with the user, one by one
   var named = t.scope === "users" ? otherUsers().filter(function (x) { return x.name; }) : [];
@@ -867,7 +923,8 @@ $("save").onclick = function () {
       });
     })
     .then(function () {
-      say("Saved" + (t.scope === "users" && t.ids.length > 1 ? " for " + t.ids.length + " users" : "") + ". The sidebar updates in about a minute.", "ok");
+      var many = (t.scope === "users" || t.scope === "subaccounts") && t.ids.length > 1;
+      say("Saved" + (many ? " for " + t.ids.length + (t.scope === "users" ? " users" : " sub-accounts") : "") + ". The sidebar updates in about a minute.", "ok");
     })
     .catch(function (e) { say(e.message, "err"); });
 };
