@@ -25,12 +25,6 @@
         "Opportunities": "Sales Pipeline"
       },
       "hideMenus": [
-        "sb_dashboard",
-        "sb_payments",
-        "sb_email-marketing",
-        "sb_reporting",
-        "sb_app-marketplace",
-        "sb_whatsapp",
         "sb_manage-scoring",
         "sb_manage-preferences",
         "sb_domains-urlRedirects",
@@ -49,9 +43,6 @@
         "a[href*='marketplace']"
       ],
       "hideMenuTitles": [
-        "Memberships",
-        "Mobile App",
-        "WhatsApp",
         "Manage Scoring",
         "Domains & URL Redirects",
         "External Tracking",
