@@ -37,6 +37,9 @@
       },
       "hideMenuTitles": [
         "WA QR2"
+      ],
+      "hideMenus": [
+        "sb_dashboard"
       ]
     },
     "NxLoq60TfQJ0yNAm3tK3": {
