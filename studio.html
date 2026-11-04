@@ -422,8 +422,8 @@ function renderList(boxId, list, arrows, isSettings) {
         bt.onclick = function () {
           var j = i + x[1];
           if (j < 0 || j >= list.length) return;
-          var tmp = list[i]; list[i] = list[j]; list[j] = tmp;
-          ORDER_DIRTY = true;
+                    var tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+          if (isSettings) { SET_TOUCHED[list[i].title] = true; SET_TOUCHED[list[j].title] = true; SET_DIRTY = true; } else ORDER_DIRTY = true;
           renderRows(); renderPreview();
         };
         ar.appendChild(bt);
