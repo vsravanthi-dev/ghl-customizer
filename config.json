@@ -70,6 +70,7 @@
         "WA QR2"
       ],
       "hideMenus": [
+        "sb_dashboard",
         "sb_payments",
         "sb_email-marketing",
         "sb_automation",
@@ -86,14 +87,6 @@
         "sb_labs",
         "sb_saas-billing",
         "sb_conversations_providers"
-      ],
-      "hideTabs": [
-        "Conversations > Manual Actions",
-        "Conversations > Trigger Links",
-        "Conversations > Analytics",
-        "Contacts > Custom Fields",
-        "Contacts > Companies",
-        "Sales Pipeline > Forecast"
       ]
     },
     "eHSTNuzvw9Vek4jMknK1": {
@@ -118,6 +111,7 @@
         "WA QR2"
       ],
       "hideMenus": [
+        "sb_dashboard",
         "sb_payments",
         "sb_email-marketing",
         "sb_automation",
@@ -134,14 +128,6 @@
         "sb_labs",
         "sb_saas-billing",
         "sb_conversations_providers"
-      ],
-      "hideTabs": [
-        "Conversations > Manual Actions",
-        "Conversations > Trigger Links",
-        "Conversations > Analytics",
-        "Contacts > Custom Fields",
-        "Contacts > Companies",
-        "Sales Pipeline > Forecast"
       ]
     },
     "BYNHWalUytfAzIF53Msw": {
@@ -166,6 +152,7 @@
         "WA QR2"
       ],
       "hideMenus": [
+        "sb_dashboard",
         "sb_payments",
         "sb_email-marketing",
         "sb_automation",
@@ -182,14 +169,6 @@
         "sb_labs",
         "sb_saas-billing",
         "sb_conversations_providers"
-      ],
-      "hideTabs": [
-        "Conversations > Manual Actions",
-        "Conversations > Trigger Links",
-        "Conversations > Analytics",
-        "Contacts > Custom Fields",
-        "Contacts > Companies",
-        "Sales Pipeline > Forecast"
       ]
     },
     "C9b8vqSkoqyL0iq3Z2nm": {
@@ -214,6 +193,7 @@
         "WA QR2"
       ],
       "hideMenus": [
+        "sb_dashboard",
         "sb_payments",
         "sb_email-marketing",
         "sb_automation",
@@ -230,14 +210,6 @@
         "sb_labs",
         "sb_saas-billing",
         "sb_conversations_providers"
-      ],
-      "hideTabs": [
-        "Conversations > Manual Actions",
-        "Conversations > Trigger Links",
-        "Conversations > Analytics",
-        "Contacts > Custom Fields",
-        "Contacts > Companies",
-        "Sales Pipeline > Forecast"
       ]
     },
     "R9k3EzZkDANa4emKSizB": {
@@ -262,6 +234,7 @@
         "WA QR2"
       ],
       "hideMenus": [
+        "sb_dashboard",
         "sb_payments",
         "sb_email-marketing",
         "sb_automation",
@@ -278,14 +251,6 @@
         "sb_labs",
         "sb_saas-billing",
         "sb_conversations_providers"
-      ],
-      "hideTabs": [
-        "Conversations > Manual Actions",
-        "Conversations > Trigger Links",
-        "Conversations > Analytics",
-        "Contacts > Custom Fields",
-        "Contacts > Companies",
-        "Sales Pipeline > Forecast"
       ]
     },
     "vtEMaPhf7DS8CH30gakW": {
@@ -310,6 +275,7 @@
         "WA QR2"
       ],
       "hideMenus": [
+        "sb_dashboard",
         "sb_payments",
         "sb_email-marketing",
         "sb_automation",
@@ -326,14 +292,6 @@
         "sb_labs",
         "sb_saas-billing",
         "sb_conversations_providers"
-      ],
-      "hideTabs": [
-        "Conversations > Manual Actions",
-        "Conversations > Trigger Links",
-        "Conversations > Analytics",
-        "Contacts > Custom Fields",
-        "Contacts > Companies",
-        "Sales Pipeline > Forecast"
       ]
     }
   }
