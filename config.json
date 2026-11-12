@@ -51,7 +51,8 @@
         "Custom Values",
         "Import Data",
         "Tags",
-        "Brand Boards"
+        "Brand Boards",
+        "reputation"
       ],
       "hideMenus": [
         "sb_dashboard",
