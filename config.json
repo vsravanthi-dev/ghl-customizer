@@ -20,9 +20,6 @@
       "Automation > Global Workflow Settings",
       "Sites > SEO",
       "Sites > Analytics"
-    ],
-    "hideMenus": [
-      "sb_dashboard"
     ]
   },
   "subaccounts": {
